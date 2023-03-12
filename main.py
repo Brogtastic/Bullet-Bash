@@ -36,19 +36,19 @@ class Game:
         mixer.music.play(-1, music_seconds_init/1000.0)
 
         red_bullet_sound = mixer.Sound('red bullet.wav')
-        red_bullet_sound.set_volume(0.3)
+        red_bullet_sound.set_volume(0.2)
         yellow_bullet_sound = mixer.Sound('yellow bullet.wav')
-        yellow_bullet_sound.set_volume(0.3)
+        yellow_bullet_sound.set_volume(0.2)
         red_die_sound = mixer.Sound('red enemy die.wav')
-        red_die_sound.set_volume(0.5)
+        red_die_sound.set_volume(0.3)
         yellow_die_sound = mixer.Sound('yellow enemy die.wav')
-        yellow_die_sound.set_volume(0.5)
+        yellow_die_sound.set_volume(0.3)
         red_ammo_sound = mixer.Sound('red ammo pickup.wav')
-        red_ammo_sound.set_volume(0.3)
+        red_ammo_sound.set_volume(0.2)
         yellow_ammo_sound = mixer.Sound('yellow ammo pickup.wav')
-        yellow_ammo_sound.set_volume(0.3)
+        yellow_ammo_sound.set_volume(0.2)
         health_kit_sound = mixer.Sound('health kit pickup.wav')
-        health_kit_sound.set_volume(0.5)
+        health_kit_sound.set_volume(0.3)
 
         size = width, height = 800, 600
         display = pygame.display.set_mode((size))
@@ -57,7 +57,7 @@ class Game:
         timer = 0
         full_health = 100
         enemy_full_health = 6
-        enemy_damage = 25
+        enemy_damage = 10
         ammo_plus = 4
         global score_to_add
         score_to_add = 0
@@ -1386,6 +1386,8 @@ class MainMenu:
                         if(on_play == True) and (playclicked == True):
                             #ammunition, ammunition1, score, health, enmies, centerx, centery, ammo, health kits, clickbullets, bullets, music seconds,
                             Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0)
+                        if (on_options == True) and (optionsclicked == True):
+                            Controls.main(Controls())
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if(on_play == True):
@@ -1399,5 +1401,43 @@ class MainMenu:
                     pygame.display.quit()
                     pygame.quit()
                     sys.exit()
+
+class Controls:
+    def main(self):
+        textfont = pygame.font.SysFont("Verdana", 50)
+        titlefont = pygame.font.SysFont("Verdana", 80)
+        #x, y, width, height
+        left_box_rect = pygame.Rect(58, 502, 65, 65)
+        center_box_rect = pygame.Rect(135, 502, 65, 65)
+        right_box_rect = pygame.Rect(212, 502, 65, 65)
+        mainmenucolor = (26, 100, 64, 25)
+        resumecolor = backgroundColor
+
+        HOVER_TIME = pygame.USEREVENT + 1
+        pygame.time.set_timer(HOVER_TIME, 3)
+
+        while True:
+
+            display.fill(backgroundColor)
+
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+
+
+            pygame.draw.rect(display, (255, 255, 255), (left_box_rect), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (center_box_rect), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (right_box_rect), 5, 5)
+
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        print("X POS: " + str(mouse_x))
+                        print("Y POS: " + str(mouse_y))
+                if event.type == pygame.QUIT:
+                    pygame.display.quit()
+                    pygame.quit()
+                    sys.exit()
+
 
 MainMenu.main(MainMenu(), False)
