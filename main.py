@@ -33,7 +33,7 @@ backgroundColor = (26, 32, 64, 25)
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init):
         mixer.music.load('Gameplay.wav')
-        mixer.music.play(-1, music_seconds_init/1000.0)
+        mixer.music.play(-1, int(music_seconds_init)/1000.0)
 
         red_bullet_sound = mixer.Sound('red bullet.wav')
         red_bullet_sound.set_volume(0.2)
@@ -1324,7 +1324,9 @@ class PauseGame:
 class MainMenu:
     def main(self, myreplay):
         mixer.music.load('Menu.wav')
-        mixer.music.play(-1)
+        #mixer.music.play(-1)
+        #
+        #
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
         play_rect = pygame.Rect(247, 303, 130, 60)
@@ -1404,14 +1406,175 @@ class MainMenu:
 
 class Controls:
     def main(self):
-        textfont = pygame.font.SysFont("Verdana", 50)
+        playerColor = (119, 131, 225, 65)
+        clock = pygame.time.Clock()
+        dt = clock.tick(60) / 1000
+        timer = 0
+        lastDirection = "right"
+
+        class Player:
+            def __init__(self, x, y, width, height, full_health, player_color):
+                self.x = x
+                self.y = y
+                self.width = width
+                self.height = height
+                self.speed = 0.3
+                self.target_x = x
+                self.target_y = y
+                self.easing = 1
+                self.timer = 0
+                self.health = full_health
+                self.color = "blue"
+                self.dead = False
+
+            def update(self, dt):
+                dx = self.target_x - self.x
+                dy = self.target_y - self.y
+
+                self.x += dx * self.easing
+                self.y += dy * self.easing
+
+                if self.x < 0:
+                    self.x = 0
+                    self.target_x = self.x
+                elif self.x > width - self.width:
+                    self.x = width - self.width
+                    self.target_x = self.x
+
+                if self.y < 0:
+                    self.y = 0
+                    self.target_y = self.y
+                elif self.y > 280:
+                    self.y = 280
+                    self.target_y = self.y
+
+                player_rect = self.get_rect()
+                self.timer -= 1
+
+            def main(self, display):
+                if ((self.timer <= 0) or ((((self.timer % 2 == 0) and (self.timer < 20)) or (((self.timer % 3 == 0) and (self.timer > 20)))) and (self.timer > 0))) and (self.health > 0):
+                    pygame.draw.rect(display, playerColor, (self.x, self.y, self.width, self.height))
+
+            def get_rect(self):
+                return pygame.Rect(self.x, self.y, self.width, self.height)
+
+            def bullet_recoil_click(self, mouse_x, mouse_y, direction, factor):
+                if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                    direction = "right"
+                if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                    direction = "left"
+                if ((mouse_y < self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                    direction = "up"
+                if ((mouse_y > self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                    direction = "down"
+                if (((mouse_x - self.x) <= -30) and (mouse_y < self.y)):
+                    direction = "upleft"
+                if (((mouse_x - self.x) >= 30) and (mouse_y < self.y)):
+                    direction = "upright"
+                if (((mouse_x - self.x) <= -30) and ((mouse_y - self.y) >= 40)):
+                    direction = "downleft"
+                if (((mouse_x - self.x) >= 30) and ((mouse_y - self.y) >= 40)):
+                    direction = "downright"
+
+                if (direction == "left"):
+                    self.target_x += self.speed * factor
+                elif (direction == "right"):
+                    self.target_x -= self.speed * factor
+                elif (direction == "up"):
+                    self.target_y += self.speed * factor
+                elif (direction == "down"):
+                    self.target_y -= self.speed * factor
+                elif (direction == "upleft"):
+                    self.target_y += self.speed * factor / 1.9
+                    self.target_x += self.speed * factor / 1.9
+                elif (direction == "upright"):
+                    self.target_y += self.speed * factor / 1.9
+                    self.target_x -= self.speed * factor / 1.9
+                elif (direction == "downleft"):
+                    self.target_y -= self.speed * factor / 1.9
+                    self.target_x += self.speed * factor / 1.9
+                elif (direction == "downright"):
+                    self.target_y -= self.speed * factor / 1.9
+                    self.target_x -= self.speed * factor / 1.9
+
+            def move_left(self):
+                self.target_x -= self.speed
+
+            def move_left_up(self):
+                self.target_x -= self.speed
+                self.target_y -= self.speed / 1.7
+
+            def move_right(self):
+                self.target_x += self.speed
+
+            def move_right_up(self):
+                self.target_x += self.speed
+                self.target_y -= self.speed / 1.7
+
+            def move_up(self):
+                self.target_y -= self.speed
+
+            def move_down(self):
+                self.target_y += self.speed
+
+            def move_left_down(self):
+                self.target_x -= self.speed
+                self.target_y += self.speed / 1.7
+
+            def move_right_down(self):
+                self.target_x += self.speed
+                self.target_y += self.speed / 1.7
+
+        player = Player(380, 162, 32, 42, 100, playerColor)
+
+
+        arrowx = 50
+        arrowy = 0
+
+        wasdx = 410
+        wasdy = 0
+
+        keyfont = pygame.font.SysFont("Verdana", 65)
         titlefont = pygame.font.SysFont("Verdana", 80)
         #x, y, width, height
-        left_box_rect = pygame.Rect(58, 502, 65, 65)
-        center_box_rect = pygame.Rect(135, 502, 65, 65)
-        right_box_rect = pygame.Rect(212, 502, 65, 65)
+        left_box_rect_fill = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
+        left_box_rect = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
+        center_box_rect_fill = pygame.Rect(135 + arrowx, 502 + arrowy, 65, 65)
+        center_box_rect = pygame.Rect(135 + arrowx, 502 + arrowy, 65, 65)
+        top_center_box_rect_fill = pygame.Rect(135 + arrowx, 422 + arrowy, 65, 65)
+        top_center_box_rect = pygame.Rect(135 + arrowx, 422 + arrowy, 65, 65)
+        right_box_rect_fill = pygame.Rect(212 + arrowx, 502 + arrowy, 65, 65)
+        right_box_rect = pygame.Rect(212 + arrowx, 502 + arrowy, 65, 65)
+        z_box_rect_fill = pygame.Rect(0 + arrowx, 340 + arrowy, 65, 65)
+        z_box_rect = pygame.Rect(0 + arrowx, 340 + arrowy, 65, 65)
+        x_box_rect_fill = pygame.Rect(75 + arrowx, 340 + arrowy, 65, 65)
+        x_box_rect = pygame.Rect(75 + arrowx, 340 + arrowy, 65, 65)
+
+        left_box_rect_fill1 = pygame.Rect(58 + wasdx, 502 + wasdy, 65, 65)
+        left_box_rect1 = pygame.Rect(58 + wasdx, 502 + wasdy, 65, 65)
+        center_box_rect_fill1 = pygame.Rect(135 + wasdx, 502 + wasdy, 65, 65)
+        center_box_rect1 = pygame.Rect(135 + wasdx, 502 + wasdy, 65, 65)
+        top_center_box_rect_fill1 = pygame.Rect(135 + wasdx, 422 + wasdy, 65, 65)
+        top_center_box_rect1 = pygame.Rect(135 + wasdx, 422 + wasdy, 65, 65)
+        right_box_rect_fill1 = pygame.Rect(212 + wasdx, 502 + wasdy, 65, 65)
+        right_box_rect1 = pygame.Rect(212 + wasdx, 502 + wasdy, 65, 65)
+        mouse_rect = pygame.Rect(275 + wasdx, 340 + wasdy, 65, 100)
+        mouse_rect_hor = pygame.Rect(275 + wasdx, 375 + wasdy, 65, 5)
+        mouse_rect_vert = pygame.Rect(306 + wasdx, 340 + wasdy, 5, 37)
+
         mainmenucolor = (26, 100, 64, 25)
         resumecolor = backgroundColor
+        buttonPressColorLeft = backgroundColor
+        buttonPressColorRight = backgroundColor
+        buttonPressColorUp = backgroundColor
+        buttonPressColorDown = backgroundColor
+        buttonPressColorZ = backgroundColor
+        buttonPressColorX = backgroundColor
+
+        buttonPressColorA = backgroundColor
+        buttonPressColorD = backgroundColor
+        buttonPressColorW = backgroundColor
+        buttonPressColorS = backgroundColor
 
         HOVER_TIME = pygame.USEREVENT + 1
         pygame.time.set_timer(HOVER_TIME, 3)
@@ -1422,10 +1585,59 @@ class Controls:
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
+            pygame.draw.rect(display, buttonPressColorLeft, (left_box_rect_fill), 0, 5)
+            pygame.draw.rect(display, buttonPressColorDown, (center_box_rect_fill), 0, 5)
+            pygame.draw.rect(display, buttonPressColorRight, (right_box_rect_fill), 0, 5)
+            pygame.draw.rect(display, buttonPressColorUp, (top_center_box_rect_fill), 0, 5)
+            pygame.draw.rect(display, buttonPressColorZ, (z_box_rect_fill), 0, 5)
+            pygame.draw.rect(display, buttonPressColorX, (x_box_rect_fill), 0, 5)
+
+            pygame.draw.rect(display, buttonPressColorA, (left_box_rect_fill1), 0, 5)
+            pygame.draw.rect(display, buttonPressColorS, (center_box_rect_fill1), 0, 5)
+            pygame.draw.rect(display, buttonPressColorD, (right_box_rect_fill1), 0, 5)
+            pygame.draw.rect(display, buttonPressColorW, (top_center_box_rect_fill1), 0, 5)
+
+
+            upArrow = keyfont.render("^", 1, (255, 255, 255))
+            downArrow = keyfont.render("v", 1, (255, 255, 255))
+            rightArrow = keyfont.render(">", 1, (255, 255, 255))
+            leftArrow = keyfont.render("<", 1, (255, 255, 255))
+            zKey = keyfont.render("z", 1, (255, 255, 255))
+            xKey = keyfont.render("x", 1, (255, 255, 255))
+            display.blit(upArrow, (141 + arrowx, 420 + arrowy))
+            display.blit(downArrow, (149 + arrowx, 485 + arrowy))
+            display.blit(rightArrow, (219 + arrowx, 490 + arrowy))
+            display.blit(leftArrow, (62 + arrowx, 490 + arrowy))
+            display.blit(zKey, (15 + arrowx, 325 + arrowy))
+            display.blit(xKey, (89 + arrowx, 325 + arrowy))
 
             pygame.draw.rect(display, (255, 255, 255), (left_box_rect), 5, 5)
             pygame.draw.rect(display, (255, 255, 255), (center_box_rect), 5, 5)
             pygame.draw.rect(display, (255, 255, 255), (right_box_rect), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (top_center_box_rect), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (z_box_rect), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (x_box_rect), 5, 5)
+
+            wKey = keyfont.render("w", 1, (255, 255, 255))
+            sKey = keyfont.render("s", 1, (255, 255, 255))
+            dKey = keyfont.render("d", 1, (255, 255, 255))
+            aKey = keyfont.render("a", 1, (255, 255, 255))
+
+            display.blit(wKey, (140 + wasdx, 407 + wasdy))
+            display.blit(sKey, (149 + wasdx, 487 + wasdy))
+            display.blit(dKey, (222 + wasdx, 490 + wasdy))
+            display.blit(aKey, (70 + wasdx, 487 + wasdy))
+            pygame.draw.rect(display, (255, 255, 255), (mouse_rect), 5, 50)
+            pygame.draw.rect(display, (255, 255, 255), (mouse_rect_hor))
+            pygame.draw.rect(display, (255, 255, 255), (mouse_rect_vert))
+
+            pygame.draw.rect(display, (255, 255, 255), (left_box_rect1), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (center_box_rect1), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (right_box_rect1), 5, 5)
+            pygame.draw.rect(display, (255, 255, 255), (top_center_box_rect1), 5, 5)
+
+            player.main(display)
+            player.update(dt)
 
             pygame.display.update()
 
@@ -1438,6 +1650,167 @@ class Controls:
                     pygame.display.quit()
                     pygame.quit()
                     sys.exit()
+
+            keys = pygame.key.get_pressed()
+
+            if (keys[pygame.K_LEFT]):
+                buttonPressColorLeft = (28, 52, 151)
+            else:
+                buttonPressColorLeft = backgroundColor
+            if (keys[pygame.K_RIGHT]):
+                buttonPressColorRight = (28, 52, 151)
+            else:
+                buttonPressColorRight = backgroundColor
+            if (keys[pygame.K_DOWN]):
+                buttonPressColorDown = (28, 52, 151)
+            else:
+                buttonPressColorDown = backgroundColor
+            if (keys[pygame.K_UP]):
+                buttonPressColorUp = (28, 52, 151)
+            else:
+                buttonPressColorUp = backgroundColor
+            if (keys[pygame.K_z]):
+                buttonPressColorZ = (28, 52, 151)
+            else:
+                buttonPressColorZ = backgroundColor
+            if (keys[pygame.K_x]):
+                buttonPressColorX = (28, 52, 151)
+            else:
+                buttonPressColorX = backgroundColor
+            if (keys[pygame.K_w]):
+                buttonPressColorW = (28, 52, 151)
+            else:
+                buttonPressColorW = backgroundColor
+            if (keys[pygame.K_a]):
+                buttonPressColorA = (28, 52, 151)
+            else:
+                buttonPressColorA = backgroundColor
+            if (keys[pygame.K_s]):
+                buttonPressColorS = (28, 52, 151)
+            else:
+                buttonPressColorS = backgroundColor
+            if (keys[pygame.K_d]):
+                buttonPressColorD = (28, 52, 151)
+            else:
+                buttonPressColorD = backgroundColor
+
+            if ((keys[pygame.K_UP] or keys[pygame.K_w]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s]))):
+                player.move_up()
+                lastDirection = "up"
+            if ((keys[pygame.K_UP] or keys[pygame.K_w]) and ((keys[pygame.K_LEFT] or keys[pygame.K_a]) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s])))):
+                player.move_left_up()
+                lastDirection = "upleft"
+            if ((keys[pygame.K_UP] or keys[pygame.K_w]) and ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s])))):
+                player.move_right_up()
+                lastDirection = "upright"
+            if ((keys[pygame.K_DOWN] or keys[pygame.K_s]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (not (keys[pygame.K_UP] or keys[pygame.K_w]))):
+                player.move_down()
+                lastDirection = "down"
+            if ((keys[pygame.K_DOWN] or keys[pygame.K_s]) and ((keys[pygame.K_LEFT] or keys[pygame.K_a]) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (not (keys[pygame.K_UP] or keys[pygame.K_w])))):
+                player.move_left_down()
+                lastDirection = "downleft"
+            if ((keys[pygame.K_DOWN] or keys[pygame.K_s]) and ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (not (keys[pygame.K_UP] or keys[pygame.K_w])))):
+                player.move_right_down()
+                lastDirection = "downright"
+            if ((keys[pygame.K_LEFT] or keys[pygame.K_a]) and (not (keys[pygame.K_UP] or keys[pygame.K_w])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s])) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d]))):
+                player.move_left()
+                lastDirection = "left"
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (not (keys[pygame.K_UP] or keys[pygame.K_w])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s])) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a]))):
+                player.move_right()
+                lastDirection = "right"
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_UP] or keys[pygame.K_w]) and (keys[pygame.K_DOWN] or keys[pygame.K_s])):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+                if (lastDirection == "up"):
+                    player.move_up()
+                if (lastDirection == "down"):
+                    player.move_down()
+                if (lastDirection == "downleft"):
+                    player.move_left_down()
+                if (lastDirection == "downright"):
+                    player.move_right_down()
+                if (lastDirection == "upleft"):
+                    player.move_left_up()
+                if (lastDirection == "upright"):
+                    player.move_right_up()
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_UP] or keys[pygame.K_w]) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s]))):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+                if (lastDirection == "up"):
+                    player.move_up()
+                if (lastDirection == "down"):
+                    player.move_down()
+                if (lastDirection == "downleft"):
+                    player.move_left_down()
+                if (lastDirection == "downright"):
+                    player.move_right_down()
+                if (lastDirection == "upleft"):
+                    player.move_left_up()
+                if (lastDirection == "upright"):
+                    player.move_right_up()
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (not (keys[pygame.K_UP] or keys[pygame.K_w])) and (keys[pygame.K_DOWN] or keys[pygame.K_s])):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+                if (lastDirection == "up"):
+                    player.move_up()
+                if (lastDirection == "down"):
+                    player.move_down()
+                if (lastDirection == "downleft"):
+                    player.move_left_down()
+                if (lastDirection == "downright"):
+                    player.move_right_down()
+                if (lastDirection == "upleft"):
+                    player.move_left_up()
+                if (lastDirection == "upright"):
+                    player.move_right_up()
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (keys[pygame.K_UP] or keys[pygame.K_w]) and (keys[pygame.K_DOWN] or keys[pygame.K_s])):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+                if (lastDirection == "up"):
+                    player.move_up()
+                if (lastDirection == "down"):
+                    player.move_down()
+                if (lastDirection == "downleft"):
+                    player.move_left_down()
+                if (lastDirection == "downright"):
+                    player.move_right_down()
+                if (lastDirection == "upleft"):
+                    player.move_left_up()
+                if (lastDirection == "upright"):
+                    player.move_right_up()
+            if ((not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (keys[pygame.K_UP] or keys[pygame.K_w]) and (keys[pygame.K_DOWN] or keys[pygame.K_s])):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+                if (lastDirection == "up"):
+                    player.move_up()
+                if (lastDirection == "down"):
+                    player.move_down()
+                if (lastDirection == "downleft"):
+                    player.move_left_down()
+                if (lastDirection == "downright"):
+                    player.move_right_down()
+                if (lastDirection == "upleft"):
+                    player.move_left_up()
+                if (lastDirection == "upright"):
+                    player.move_right_up()
+            if ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) and (keys[pygame.K_LEFT] or keys[pygame.K_a]) and (not (keys[pygame.K_UP] or keys[pygame.K_w])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s]))):
+                if (lastDirection == "right"):
+                    player.move_right()
+                if (lastDirection == "left"):
+                    player.move_left()
+
+
+
 
 
 MainMenu.main(MainMenu(), False)
