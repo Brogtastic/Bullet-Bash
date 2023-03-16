@@ -4,12 +4,9 @@ Author: Michael Brogdon
 
 TODO:
 1.) Main Menu Art
-2.) Music and Sound Effects
-3.) Pause Screen Draw
-4.) Controls Menu
-5.) Auto-Aiming Choice
-6.) SFX: Bullet Hit, Player Hurt, Player Dead
-7.) Shift = speed or invincibility
+2.) Pause Screen Draw
+3.) Aiming Assist
+4.) SFX: Bullet Hit, Player Hurt, Player Dead
 
 '''
 
@@ -31,7 +28,7 @@ pygame.display.set_caption('Bullet Bash')
 backgroundColor = (26, 32, 64, 25)
 
 class Game:
-    def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init):
+    def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init, auto_aiming_init):
         mixer.music.load('Gameplay.wav')
         mixer.music.play(-1, int(music_seconds_init)/1000.0)
 
@@ -69,6 +66,7 @@ class Game:
         player_bullets_click_track = player_bullets_click_track_init
         player_bullets_track = player_bullets_track_init
         health_kit_track = health_kit_track_init
+        auto_aiming = auto_aiming_init
 
         '''
         OG COLORS
@@ -89,7 +87,7 @@ class Game:
         healthBarBGColor = (50, 138, 178, 70)
 
         class Player:
-            def __init__(self, x, y, width, height, full_health, player_color):
+            def __init__(self, x, y, width, height, full_health, player_color, auto):
                 self.x = x
                 self.y = y
                 self.width = width
@@ -102,6 +100,7 @@ class Game:
                 self.health = full_health
                 self.color = "blue"
                 self.dead = False
+                self.auto = auto
 
             def update(self, dt):
                 dx = self.target_x - self.x
@@ -135,22 +134,23 @@ class Game:
                 return pygame.Rect(self.x, self.y, self.width, self.height)
 
             def bullet_recoil_click(self, mouse_x, mouse_y, direction, factor):
-                if((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
-                    direction = "right"
-                if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
-                    direction = "left"
-                if ((mouse_y < self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
-                    direction = "up"
-                if ((mouse_y > self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
-                    direction = "down"
-                if (((mouse_x - self.x) <= -30) and (mouse_y < self.y)):
-                    direction = "upleft"
-                if (((mouse_x - self.x) >= 30) and (mouse_y < self.y)):
-                    direction = "upright"
-                if (((mouse_x - self.x) <= -30) and ((mouse_y - self.y) >= 40)):
-                    direction = "downleft"
-                if (((mouse_x - self.x) >= 30) and ((mouse_y - self.y) >= 40)):
-                    direction = "downright"
+                if (self.auto == True):
+                    if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                        direction = "right"
+                    if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                        direction = "left"
+                    if ((mouse_y < self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                        direction = "up"
+                    if ((mouse_y > self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                        direction = "down"
+                    if (((mouse_x - self.x) <= -30) and (mouse_y < self.y)):
+                        direction = "upleft"
+                    if (((mouse_x - self.x) >= 30) and (mouse_y < self.y)):
+                        direction = "upright"
+                    if (((mouse_x - self.x) <= -30) and ((mouse_y - self.y) >= 40)):
+                        direction = "downleft"
+                    if (((mouse_x - self.x) >= 30) and ((mouse_y - self.y) >= 40)):
+                        direction = "downright"
 
                 if (direction == "left"):
                     self.target_x += self.speed * factor
@@ -248,53 +248,93 @@ class Game:
                 self.target_y += self.speed / 1.7
 
         class PlayerBullet:
-            def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel):
+            def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel, auto, playerdirection):
                 if (color == bulletColor):
                     red_bullet_sound.play()
                 else:
                     yellow_bullet_sound.play()
                 self.x = x
                 self.y = y
-                self.enemy_x = closest_enemy_x
-                self.enemy_y = closest_enemy_y
-                if ((self.enemy_x > self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
-                    #"right"
-                    self.x = x + 30
-                    self.y = y + 20
-                if ((self.enemy_x < self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
-                    #"left"
-                    self.x = x - 10
-                    self.y = y + 20
-                if ((self.enemy_y < self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
-                    #"up"
-                    self.x = x + 15
-                    self.y = y - 5
-                if ((self.enemy_y > self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
-                    #"down"
-                    self.x = x + 15
-                    self.y = y + 40
-                if (((self.enemy_x - self.x) <= -30) and (self.enemy_y < self.y)):
-                    #"upleft"
-                    self.x = x
-                    self.y = y
-                if (((self.enemy_x - self.x) >= 30) and (self.enemy_y < self.y)):
-                    #"upright"
-                    self.x = x + 40
-                    self.y = y
-                if (((self.enemy_x - self.x) <= -30) and ((self.enemy_y - self.y) >= 40)):
-                    #"downleft"
-                    self.x = x - 2
-                    self.y = y + 45
-                if (((self.enemy_x - self.x) >= 30) and ((self.enemy_y - self.y) >= 40)):
-                    #"downright"
-                    self.x = x + 40
-                    self.y = y + 45
+                self.enemy_x = closest_enemy_x + 20
+                self.enemy_y = closest_enemy_y + 30
                 self.speed = 15
-                if (angle == 0 and x_vel == 0 and y_vel == 0):
+                self.auto = auto
+                self.playerdirection = playerdirection
+                if (self.auto == True):
+                    if ((self.enemy_x > self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
+                        # "right"
+                        self.x = x + 30
+                        self.y = y + 20
+                    if ((self.enemy_x < self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
+                        # "left"
+                        self.x = x - 10
+                        self.y = y + 20
+                    if ((self.enemy_y < self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
+                        # "up"
+                        self.x = x + 15
+                        self.y = y - 5
+                    if ((self.enemy_y > self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
+                        # "down"
+                        self.x = x + 15
+                        self.y = y + 40
+                    if (((self.enemy_x - self.x) <= -30) and (self.enemy_y < self.y)):
+                        # "upleft"
+                        self.x = x
+                        self.y = y
+                    if (((self.enemy_x - self.x) >= 30) and (self.enemy_y < self.y)):
+                        # "upright"
+                        self.x = x + 40
+                        self.y = y
+                    if (((self.enemy_x - self.x) <= -30) and ((self.enemy_y - self.y) >= 40)):
+                        # "downleft"
+                        self.x = x - 2
+                        self.y = y + 45
+                    if (((self.enemy_x - self.x) >= 30) and ((self.enemy_y - self.y) >= 40)):
+                        # "downright"
+                        self.x = x + 40
+                        self.y = y + 45
+                else:
+                    if (self.playerdirection == "right"):
+                        # "right"
+                        self.x = x + 30
+                        self.y = y + 20
+                    if (self.playerdirection == "left"):
+                        # "left"
+                        self.x = x - 10
+                        self.y = y + 20
+                    if (self.playerdirection == "up"):
+                        # "up"
+                        self.x = x + 15
+                        self.y = y - 5
+                    if (self.playerdirection == "down"):
+                        # "down"
+                        self.x = x + 15
+                        self.y = y + 40
+                    if (self.playerdirection == "upleft"):
+                        # "upleft"
+                        self.x = x
+                        self.y = y
+                    if (self.playerdirection == "upright"):
+                        # "upright"
+                        self.x = x + 40
+                        self.y = y
+                    if (self.playerdirection == "downleft"):
+                        # "downleft"
+                        self.x = x - 2
+                        self.y = y + 45
+                    if (self.playerdirection == "downright"):
+                        # "downright"
+                        self.x = x + 40
+                        self.y = y + 45
+
+                if (angle == 0 and x_vel == 0 and y_vel == 0 and self.auto == True):
                     self.angle = math.atan2(self.y - self.enemy_y, self.x - self.enemy_x)
                     self.x_vel = math.cos(self.angle) * self.speed
                     self.y_vel = math.sin(self.angle) * self.speed
-                else:
+                    print("self.angle = " + str(self.angle))
+                    print("self.x_vel = " + str(math.cos(self.angle)))
+                    print("self.y_vel = " + str(math.sin(self.angle)))
+                elif (angle == 0 and x_vel == 0 and y_vel == 0):
                     self.angle = angle
                     self.x_vel = x_vel
                     self.y_vel = y_vel
@@ -305,14 +345,35 @@ class Game:
                 self.direction = direction
                 self.exploded = exploded
                 self.direction = direction
-                self.speed = 15
                 self.is_alive = True
                 self.color = color
 
 
             def main(self, display):
-                self.x -= int(self.x_vel)
-                self.y -= int(self.y_vel)
+                if (self.auto == True):
+                    self.x -= int(self.x_vel)
+                    self.y -= int(self.y_vel)
+                else:
+                    if (self.playerdirection == "right"):
+                        self.x += self.speed
+                    if (self.playerdirection == "left"):
+                        self.x -= self.speed
+                    if (self.playerdirection == "up"):
+                        self.y -= self.speed
+                    if (self.playerdirection == "down"):
+                        self.y += self.speed
+                    if (self.playerdirection == "upleft"):
+                        self.y -= self.speed / 1.7
+                        self.x -= self.speed / 1.7
+                    if (self.playerdirection == "upright"):
+                        self.y -= self.speed / 1.7
+                        self.x += self.speed / 1.7
+                    if (self.playerdirection == "downleft"):
+                        self.y += self.speed / 1.7
+                        self.x -= self.speed / 1.7
+                    if (self.playerdirection == "downright"):
+                        self.y += self.speed / 1.7
+                        self.x += self.speed / 1.7
                 bullet_rect = pygame.Rect(self.x - 7, self.y - 7, 10, 10)
                 if (self.is_alive == True) and (player.dead == False):
                     pygame.draw.circle(display, self.color, (self.x, self.y), 7)
@@ -595,8 +656,8 @@ class Game:
                 if self.x < 0:
                     self.x = 3
                     self.target_x = self.x
-                elif self.x > width - self.width:
-                    self.x = (width - 10) - self.width
+                elif self.x > width - self.width - 25:
+                    self.x = width - self.width - 25
                     self.target_x = self.x
 
                 if self.y < 0:
@@ -769,7 +830,7 @@ class Game:
         #Health_Kit(300, 300, 45, 25)
 
         #Initialize Player position and size
-        player = Player(player_x_init, player_y_init, 32, 42, health_init, playerColor)
+        player = Player(player_x_init, player_y_init, 32, 42, health_init, playerColor, auto_aiming)
         cursor_circle = Cursor_Circle(0, 0)
         health_bar = Health_Bar(30, 28, 20, 2)
         health_bar_bg = Health_Bar_BG(30, 28, 20, 2)
@@ -900,9 +961,9 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if(on_main_menu == True) and (main_menu_click == True):
-                            MainMenu.main(MainMenu(), False)
+                            MainMenu.main(MainMenu(), False, auto_aiming)
                         if(on_replay == True) and (replay_click == True):
-                            MainMenu.main(MainMenu(), True)
+                            MainMenu.main(MainMenu(), True, auto_aiming)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if(on_replay == True):
@@ -964,7 +1025,7 @@ class Game:
                         if (lastDirection == "right"):
                             lastDirection = "left"
                     if (event.key == pygame.K_p) and (player.health > 0):
-                        PauseGame.main(PauseGame(), ammunition, ammunition1, score, player.health, enemy_track, player.x, player.y, ammo_track, health_kit_track, player_bullets_click_track, player_bullets_track, music_seconds)
+                        PauseGame.main(PauseGame(), ammunition, ammunition1, score, player.health, enemy_track, player.x, player.y, ammo_track, health_kit_track, player_bullets_click_track, player_bullets_track, music_seconds, auto_aiming)
 
             keys = pygame.key.get_pressed()
 
@@ -1107,8 +1168,8 @@ class Game:
                 if (keys[pygame.K_z]):
                     cursor_circle.visible = False
                     if (shootAgain == True) and (ammunition > 0) and (player.dead == False):
-                        player_bullets_track.append((player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, lastDirection,bulletColor, 0, True, False, 0, 0, 0))
-                        player_bullets.append(PlayerBullet(player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, closest_enemy_direction, bulletColor, len(player_bullets_track), True, False, 0, 0, 0))
+                        player_bullets_track.append((player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, lastDirection,bulletColor, 0, True, False, 0, 0, 0, auto_aiming, lastDirection))
+                        player_bullets.append(PlayerBullet(player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, closest_enemy_direction, bulletColor, len(player_bullets_track), True, False, 0, 0, 0, auto_aiming, lastDirection))
                         player.bullet_recoil_click(closest_red_enemy_x, closest_red_enemy_y, lastDirection, 2)
                         ammunition -= 1
                         shootAgain = False
@@ -1116,8 +1177,8 @@ class Game:
                 if (keys[pygame.K_x]):
                     cursor_circle.visible = False
                     if (shootAgain == True) and (ammunition1 > 0) and (player.dead == False):
-                        player_bullets_track.append((player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, lastDirection, bulletColor2, 0, True, False, 0, 0, 0))
-                        player_bullets.append(PlayerBullet(player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, closest_enemy_direction, bulletColor2, len(player_bullets_track), True, False, 0, 0, 0))
+                        player_bullets_track.append((player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, lastDirection, bulletColor2, 0, True, False, 0, 0, 0, auto_aiming, lastDirection))
+                        player_bullets.append(PlayerBullet(player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, closest_enemy_direction, bulletColor2, len(player_bullets_track), True, False, 0, 0, 0, auto_aiming, lastDirection))
                         player.bullet_recoil_click(closest_yellow_enemy_x, closest_yellow_enemy_y, lastDirection, 2)
                         ammunition1 -= 1
                         shootAgain = False
@@ -1254,7 +1315,7 @@ class Game:
                 cursor_circle.main(display, mouse_x, mouse_y)
 
 class PauseGame:
-    def main(self, ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont):
+    def main(self, ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont):
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
         resume_rect = pygame.Rect(247, 303, 225, 60)
@@ -1302,9 +1363,9 @@ class PauseGame:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if (on_resume == True) and (clickdown == 1):
-                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont)
+                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont)
                         if (on_main_menu == True) and (clickdown == 2):
-                            MainMenu.main(MainMenu(), False)
+                            MainMenu.main(MainMenu(), False, aiming_cont)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if (on_resume == True):
@@ -1315,14 +1376,14 @@ class PauseGame:
                             clickdown = 0
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont)
+                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont)
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
                     pygame.quit()
                     sys.exit()
 
 class MainMenu:
-    def main(self, myreplay):
+    def main(self, myreplay, aiming_init):
         mixer.music.load('Menu.wav')
         #mixer.music.play(-1)
         #
@@ -1347,10 +1408,11 @@ class MainMenu:
         health_kit_track = []
         player_bullet_click_track = []
         player_bullet_track = []
+        auto_aiming_init = aiming_init
 
         while True:
             if (myreplay == True):
-                Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0)
+                Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0, auto_aiming_init)
 
             pygame.mouse.set_visible(True)
 
@@ -1387,9 +1449,9 @@ class MainMenu:
                     if event.button == 1:
                         if(on_play == True) and (playclicked == True):
                             #ammunition, ammunition1, score, health, enmies, centerx, centery, ammo, health kits, clickbullets, bullets, music seconds,
-                            Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0)
+                            Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0, auto_aiming_init)
                         if (on_options == True) and (optionsclicked == True):
-                            Controls.main(Controls())
+                            Controls.main(Controls(), aiming_init)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if(on_play == True):
@@ -1405,7 +1467,7 @@ class MainMenu:
                     sys.exit()
 
 class Controls:
-    def main(self):
+    def main(self, aiming_init):
         red_bullet_sound = mixer.Sound('red bullet.wav')
         red_bullet_sound.set_volume(0.2)
         yellow_bullet_sound = mixer.Sound('yellow bullet.wav')
@@ -1430,9 +1492,10 @@ class Controls:
         closest_red_enemy_y = 165
         closest_yellow_enemy_x = 670
         closest_yellow_enemy_y = 165
+        autoAiming = aiming_init
 
         class Player:
-            def __init__(self, x, y, width, height, full_health, player_color):
+            def __init__(self, x, y, width, height, full_health, player_color, auto):
                 self.x = x
                 self.y = y
                 self.width = width
@@ -1445,6 +1508,7 @@ class Controls:
                 self.health = full_health
                 self.color = "blue"
                 self.dead = False
+                self.auto = auto
 
             def update(self, dt):
                 dx = self.target_x - self.x
@@ -1478,22 +1542,23 @@ class Controls:
                 return pygame.Rect(self.x, self.y, self.width, self.height)
 
             def bullet_recoil_click(self, mouse_x, mouse_y, direction, factor):
-                if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
-                    direction = "right"
-                if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
-                    direction = "left"
-                if ((mouse_y < self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
-                    direction = "up"
-                if ((mouse_y > self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
-                    direction = "down"
-                if (((mouse_x - self.x) <= -30) and (mouse_y < self.y)):
-                    direction = "upleft"
-                if (((mouse_x - self.x) >= 30) and (mouse_y < self.y)):
-                    direction = "upright"
-                if (((mouse_x - self.x) <= -30) and ((mouse_y - self.y) >= 40)):
-                    direction = "downleft"
-                if (((mouse_x - self.x) >= 30) and ((mouse_y - self.y) >= 40)):
-                    direction = "downright"
+                if(self.auto == True):
+                    if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                        direction = "right"
+                    if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
+                        direction = "left"
+                    if ((mouse_y < self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                        direction = "up"
+                    if ((mouse_y > self.y) and (((mouse_x - self.x) >= 0) and (mouse_x - self.x) <= 30)):
+                        direction = "down"
+                    if (((mouse_x - self.x) <= -30) and (mouse_y < self.y)):
+                        direction = "upleft"
+                    if (((mouse_x - self.x) >= 30) and (mouse_y < self.y)):
+                        direction = "upright"
+                    if (((mouse_x - self.x) <= -30) and ((mouse_y - self.y) >= 40)):
+                        direction = "downleft"
+                    if (((mouse_x - self.x) >= 30) and ((mouse_y - self.y) >= 40)):
+                        direction = "downright"
 
                 if (direction == "left"):
                     self.target_x += self.speed * factor
@@ -1700,7 +1765,7 @@ class Controls:
                     pygame.draw.rect(display, playerColor, (self.x, self.y, self.width * self.timer / 15, self.height * self.timer / 15))
 
         class PlayerBullet:
-            def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel):
+            def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel, auto, playerdirection):
                 if (color == bulletColor):
                     red_bullet_sound.play()
                 else:
@@ -1710,43 +1775,83 @@ class Controls:
                 self.enemy_x = closest_enemy_x + 20
                 self.enemy_y = closest_enemy_y + 30
                 self.speed = 15
-                if ((self.enemy_x > self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
-                    #"right"
-                    self.x = x + 30
-                    self.y = y + 20
-                if ((self.enemy_x < self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
-                    #"left"
-                    self.x = x - 10
-                    self.y = y + 20
-                if ((self.enemy_y < self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
-                    #"up"
-                    self.x = x + 15
-                    self.y = y - 5
-                if ((self.enemy_y > self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
-                    #"down"
-                    self.x = x + 15
-                    self.y = y + 40
-                if (((self.enemy_x - self.x) <= -30) and (self.enemy_y < self.y)):
-                    #"upleft"
-                    self.x = x
-                    self.y = y
-                if (((self.enemy_x - self.x) >= 30) and (self.enemy_y < self.y)):
-                    #"upright"
-                    self.x = x + 40
-                    self.y = y
-                if (((self.enemy_x - self.x) <= -30) and ((self.enemy_y - self.y) >= 40)):
-                    #"downleft"
-                    self.x = x - 2
-                    self.y = y + 45
-                if (((self.enemy_x - self.x) >= 30) and ((self.enemy_y - self.y) >= 40)):
-                    #"downright"
-                    self.x = x + 40
-                    self.y = y + 45
-                if (angle == 0 and x_vel == 0 and y_vel == 0):
+                self.auto = auto
+                self.playerdirection = playerdirection
+                if(self.auto == True):
+                    if ((self.enemy_x > self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
+                        #"right"
+                        self.x = x + 30
+                        self.y = y + 20
+                    if ((self.enemy_x < self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
+                        #"left"
+                        self.x = x - 10
+                        self.y = y + 20
+                    if ((self.enemy_y < self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
+                        #"up"
+                        self.x = x + 15
+                        self.y = y - 5
+                    if ((self.enemy_y > self.y) and (((self.enemy_x - self.x) >= 0) and (self.enemy_x - self.x) <= 30)):
+                        #"down"
+                        self.x = x + 15
+                        self.y = y + 40
+                    if (((self.enemy_x - self.x) <= -30) and (self.enemy_y < self.y)):
+                        #"upleft"
+                        self.x = x
+                        self.y = y
+                    if (((self.enemy_x - self.x) >= 30) and (self.enemy_y < self.y)):
+                        #"upright"
+                        self.x = x + 40
+                        self.y = y
+                    if (((self.enemy_x - self.x) <= -30) and ((self.enemy_y - self.y) >= 40)):
+                        #"downleft"
+                        self.x = x - 2
+                        self.y = y + 45
+                    if (((self.enemy_x - self.x) >= 30) and ((self.enemy_y - self.y) >= 40)):
+                        #"downright"
+                        self.x = x + 40
+                        self.y = y + 45
+                else:
+                    if (self.playerdirection == "right"):
+                        #"right"
+                        self.x = x + 30
+                        self.y = y + 20
+                    if (self.playerdirection == "left"):
+                        #"left"
+                        self.x = x - 10
+                        self.y = y + 20
+                    if (self.playerdirection == "up"):
+                        #"up"
+                        self.x = x + 15
+                        self.y = y - 5
+                    if (self.playerdirection == "down"):
+                        #"down"
+                        self.x = x + 15
+                        self.y = y + 40
+                    if (self.playerdirection == "upleft"):
+                        #"upleft"
+                        self.x = x
+                        self.y = y
+                    if (self.playerdirection == "upright"):
+                        #"upright"
+                        self.x = x + 40
+                        self.y = y
+                    if (self.playerdirection == "downleft"):
+                        #"downleft"
+                        self.x = x - 2
+                        self.y = y + 45
+                    if (self.playerdirection == "downright"):
+                        #"downright"
+                        self.x = x + 40
+                        self.y = y + 45
+
+                if (angle == 0 and x_vel == 0 and y_vel == 0 and self.auto == True):
                     self.angle = math.atan2(self.y - self.enemy_y, self.x - self.enemy_x)
                     self.x_vel = math.cos(self.angle) * self.speed
                     self.y_vel = math.sin(self.angle) * self.speed
-                else:
+                    print("self.angle = " + str(self.angle))
+                    print("self.x_vel = " + str(math.cos(self.angle)))
+                    print("self.y_vel = " + str(math.sin(self.angle)))
+                elif (angle == 0 and x_vel == 0 and y_vel == 0):
                     self.angle = angle
                     self.x_vel = x_vel
                     self.y_vel = y_vel
@@ -1762,8 +1867,30 @@ class Controls:
 
 
             def main(self, display):
-                self.x -= int(self.x_vel)
-                self.y -= int(self.y_vel)
+                if(self.auto == True):
+                    self.x -= int(self.x_vel)
+                    self.y -= int(self.y_vel)
+                else:
+                    if(self.playerdirection == "right"):
+                        self.x += self.speed
+                    if (self.playerdirection == "left"):
+                        self.x -= self.speed
+                    if(self.playerdirection == "up"):
+                        self.y -= self.speed
+                    if (self.playerdirection == "down"):
+                        self.y += self.speed
+                    if (self.playerdirection == "upleft"):
+                        self.y -= self.speed / 1.7
+                        self.x -= self.speed / 1.7
+                    if (self.playerdirection == "upright"):
+                        self.y -= self.speed / 1.7
+                        self.x += self.speed / 1.7
+                    if (self.playerdirection == "downleft"):
+                        self.y += self.speed / 1.7
+                        self.x -= self.speed / 1.7
+                    if (self.playerdirection == "downright"):
+                        self.y += self.speed / 1.7
+                        self.x += self.speed / 1.7
                 bullet_rect = pygame.Rect(self.x - 7, self.y - 7, 10, 10)
                 if (self.is_alive == True) and (player.dead == False):
                     pygame.draw.circle(display, self.color, (self.x, self.y), 7)
@@ -1897,9 +2024,11 @@ class Controls:
                 elif (self.timer > 0) and (self.color == bulletColor2):
                     pygame.draw.circle(display, self.color, (self.x, self.y), self.size * self.timer / 7)
 
-        player = Player(380, 162, 32, 42, 100, playerColor)
+        player = Player(380, 162, 32, 42, 100, playerColor, autoAiming)
         bulletColor = (245, 122, 113, 96)
         bulletColor2 = (245, 178, 64, 96)
+        lightred = (253, 46, 41, 0)
+        lightyellow = (224, 141, 0, 0)
         cursor_circle = Cursor_Circle(0, 0)
         enemies = []
         enemy_full_health = 6
@@ -1912,6 +2041,9 @@ class Controls:
         closest_distance = 1000
         closest_enemy = None
         closest_enemy_direction = "right"
+
+        onCheckbox = False
+        checkboxClicked = False
 
         shootAgain = True
         hurtAgain = True
@@ -1933,6 +2065,8 @@ class Controls:
 
         keyfont = pygame.font.SysFont("Verdana", 65)
         titlefont = pygame.font.SysFont("Verdana", 80)
+        tutorialfont = pygame.font.SysFont("Verdana", 25)
+        aimingfont = pygame.font.SysFont("Verdana", 15)
         #x, y, width, height
         left_box_rect_fill = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
         left_box_rect = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
@@ -1968,21 +2102,25 @@ class Controls:
         back_arrow_rect = pygame.Rect(50, 43, 50, 20)
         back_arrow_clickable = pygame.Rect(18, 30, 83, 50)
 
+        checkbox_highlight_rect = pygame.Rect(51, 425, 20, 20)
+        checkbox_rect = pygame.Rect(51, 425, 20, 20)
+
         mainmenucolor = (26, 100, 64, 25)
         resumecolor = backgroundColor
         buttonPressColorLeft = backgroundColor
         buttonPressColorRight = backgroundColor
         buttonPressColorUp = backgroundColor
         buttonPressColorDown = backgroundColor
-        buttonPressColorZ = backgroundColor
-        buttonPressColorX = backgroundColor
+        buttonPressColorZ = lightred
+        buttonPressColorX = lightyellow
 
         buttonPressColorA = backgroundColor
         buttonPressColorD = backgroundColor
         buttonPressColorW = backgroundColor
         buttonPressColorS = backgroundColor
-        rightClickPress = backgroundColor
-        leftClickPress = backgroundColor
+        checkboxhighlightcolor = backgroundColor
+        rightClickPress = lightyellow
+        leftClickPress = lightred
 
         backArrowColor = backgroundColor
 
@@ -2065,6 +2203,20 @@ class Controls:
             pygame.draw.rect(display, (255, 255, 255), (right_box_rect1), 5, 5)
             pygame.draw.rect(display, (255, 255, 255), (top_center_box_rect1), 5, 5)
 
+            pygame.draw.rect(display, checkboxhighlightcolor, (checkbox_highlight_rect), 10, 5)
+            pygame.draw.rect(display, (255, 255, 255), (checkbox_rect), 3, 5)
+            aimText = aimingfont.render("Auto-Aiming", 1, (255, 255, 255))
+            display.blit(aimText, (78, 425))
+
+            if(autoAiming == True):
+                pygame.draw.line(display, (255, 255, 255), (56, 430), (62, 438), 5)
+                pygame.draw.line(display, (255, 255, 255), (61, 438), (72, 420), 5)
+
+            tutorialText = tutorialfont.render("Try moving with the arrow keys or WASD", 1, (255, 255, 255))
+            tutorialText2 = tutorialfont.render("And shooting with z, x, or clicking the mouse", 1, (255, 255, 255))
+            display.blit(tutorialText, (175, 16))
+            display.blit(tutorialText2, (150, 50))
+
 
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -2075,10 +2227,21 @@ class Controls:
                             backArrowClicked = True
                         else:
                             backArrowClicked = False
+                        if(onCheckbox == True):
+                            checkboxClicked = True
+                        else:
+                            checkboxClicked = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if(backArrowClicked == True) and (onBackArrow == True):
-                            MainMenu.main(MainMenu(), False)
+                            MainMenu.main(MainMenu(), False, autoAiming)
+                        if(checkboxClicked == True) and (onCheckbox == True):
+                            if(autoAiming == True):
+                                autoAiming = False
+                                player.auto = False
+                            else:
+                                autoAiming = True
+                                player.auto = True
                 if event.type == BULLET_SPRAY_DELAY:
                     shootAgain = True
                 if event.type == INVINCIBILITY:
@@ -2100,7 +2263,7 @@ class Controls:
 
             keys = pygame.key.get_pressed()
 
-            if (pygame.mouse.get_pressed()[0]) and (onBackArrow == False):
+            if (pygame.mouse.get_pressed()[0]) and (onBackArrow == False) and (onCheckbox == False):
                 leftClickPress = bulletColor
                 if(shootAgain == True):
                     player.bullet_recoil_click(mouse_x, mouse_y, lastDirection, 2)
@@ -2108,9 +2271,9 @@ class Controls:
                     shootAgain = False
                     pygame.time.set_timer(BULLET_SPRAY_DELAY, 100)
             else:
-                leftClickPress = backgroundColor
+                leftClickPress = lightred
 
-            if (pygame.mouse.get_pressed()[2]):
+            if (pygame.mouse.get_pressed()[2]) and (onBackArrow == False) and (onCheckbox == False):
                 rightClickPress = bulletColor2
                 if (shootAgain == True):
                     player_bullets_click.append(PlayerBulletClick(player.x, player.y, mouse_x, mouse_y, lastDirection, bulletColor2, len(player_bullets_click), True, False, 0, 0, 0))
@@ -2118,7 +2281,7 @@ class Controls:
                     shootAgain = False
                     pygame.time.set_timer(BULLET_SPRAY_DELAY, 100)
             else:
-                rightClickPress = backgroundColor
+                rightClickPress = lightyellow
 
             if (keys[pygame.K_LEFT]):
                 buttonPressColorLeft = (28, 52, 151)
@@ -2140,22 +2303,22 @@ class Controls:
                 buttonPressColorZ = bulletColor
                 cursor_circle.visible = False
                 if (shootAgain == True):
-                    player_bullets.append(PlayerBullet(player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, closest_enemy_direction, bulletColor, len(player_bullets), True, False, 0, 0, 0))
+                    player_bullets.append(PlayerBullet(player.x, player.y, closest_red_enemy_x, closest_red_enemy_y, closest_enemy_direction, bulletColor, len(player_bullets), True, False, 0, 0, 0, autoAiming, lastDirection))
                     player.bullet_recoil_click(closest_red_enemy_x, closest_red_enemy_y, lastDirection, 2)
                     shootAgain = False
                     pygame.time.set_timer(BULLET_SPRAY_DELAY, 100)
             else:
-                buttonPressColorZ = backgroundColor
+                buttonPressColorZ = lightred
             if (keys[pygame.K_x]):
                 buttonPressColorX = bulletColor2
                 cursor_circle.visible = False
                 if(shootAgain == True):
-                    player_bullets.append(PlayerBullet(player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, closest_enemy_direction, bulletColor2, len(player_bullets), True, False, 0, 0, 0))
+                    player_bullets.append(PlayerBullet(player.x, player.y, closest_yellow_enemy_x, closest_yellow_enemy_y, closest_enemy_direction, bulletColor2, len(player_bullets), True, False, 0, 0, 0, autoAiming, lastDirection))
                     player.bullet_recoil_click(closest_yellow_enemy_x, closest_yellow_enemy_y, lastDirection, 2)
                     shootAgain = False
                     pygame.time.set_timer(BULLET_SPRAY_DELAY, 100)
             else:
-                buttonPressColorX = backgroundColor
+                buttonPressColorX = lightyellow
             if (keys[pygame.K_w]):
                 buttonPressColorW = (28, 52, 151)
             else:
@@ -2181,8 +2344,16 @@ class Controls:
                 backArrowColor = backgroundColor
                 onBackArrow = False
                 pygame.mouse.set_visible(False)
+            if(checkbox_highlight_rect.collidepoint(mouse_x, mouse_y)):
+                checkboxhighlightcolor = (28, 52, 151)
+                pygame.mouse.set_visible(True)
+                cursor_circle.visible = False
+                onCheckbox = True
+            else:
+                checkboxhighlightcolor = backgroundColor
+                onCheckbox = False
 
-            if pygame.mouse.get_rel()[0] != 0 and not keys[pygame.K_z] and not keys[pygame.K_x] and not onBackArrow:
+            if pygame.mouse.get_rel()[0] != 0 and not keys[pygame.K_z] and not keys[pygame.K_x] and not onBackArrow and not onCheckbox:
                 cursor_circle.visible = True
 
             if ((keys[pygame.K_UP] or keys[pygame.K_w]) and (not (keys[pygame.K_LEFT] or keys[pygame.K_a])) and (not (keys[pygame.K_RIGHT] or keys[pygame.K_d])) and (not (keys[pygame.K_DOWN] or keys[pygame.K_s]))):
@@ -2392,4 +2563,4 @@ class Controls:
 
 
 
-MainMenu.main(MainMenu(), False)
+MainMenu.main(MainMenu(), False, True)
