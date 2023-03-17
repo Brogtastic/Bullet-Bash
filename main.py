@@ -6,7 +6,6 @@ TODO:
 1.) Main Menu Art
 2.) Pause Screen Draw
 3.) SFX: Bullet Hit, Player Hurt, Player Dead
-4.) Display High Score
 
 '''
 
@@ -31,15 +30,9 @@ class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init, auto_aiming_init, high_score_init, mute_init):
         mute = mute_init
         mixer.music.load('Gameplay.wav')
-        try:
-            if music_seconds_init <= 0:
-                raise ValueError("Initial music position must be a positive number.")
-            if(mute == False):
-                pygame.mixer.music.play(-1, music_seconds_init / 1000.0)
-        except ValueError as e:
-            print("Error:", e)
-            if(mute == False):
-                pygame.mixer.music.play(-1)
+        #pygame.mixer.music.play(-1, music_seconds_init / 1000.0)
+        if(mute == False):
+            pygame.mixer.music.play(-1)
 
         if(mute == False):
             lowVolume = 0.2
@@ -1456,18 +1449,13 @@ class MainMenu:
     def main(self, myreplay, aiming_init, high_score_init, menu_music_seconds_init, mute_init):
         mute = mute_init
         mixer.music.load('Menu.wav')
-        try:
-            if menu_music_seconds_init <= 0:
-                raise ValueError("Initial music position must be a positive number.")
-            if(mute == False):
-                pygame.mixer.music.play(-1, menu_music_seconds_init / 1000.0)
-        except ValueError as e:
-            print("Error:", e)
-            if(mute == False):
-                pygame.mixer.music.play(-1)
+        #pygame.mixer.music.play(-1, menu_music_seconds_init / 1000.0)
+        if(mute == False):
+            pygame.mixer.music.play(-1)
 
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
+        highscorefont = pygame.font.SysFont("monospace", 20)
         play_rect = pygame.Rect(247, 303, 130, 60)
         option_rect = pygame.Rect(247, 403, 290, 60)
         highlightcolor = (255, 100, 100, 0)
@@ -1493,6 +1481,7 @@ class MainMenu:
         while True:
             if (myreplay == True):
                 Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0, auto_aiming_init, high_score, mute)
+
 
             pygame.mouse.set_visible(True)
 
@@ -1524,6 +1513,12 @@ class MainMenu:
             else:
                 pygame.draw.line(display, (255, 255, 255), (761, 534), (780, 563), 5)
                 pygame.draw.line(display, (255, 255, 255), (761, 563), (780, 534), 5)
+
+            high_score_string = ("0" * (7 - len(str(high_score)))) + str(high_score)
+            highSCORE = highscorefont.render(high_score_string, 1, (255, 255, 255))
+            hi_score = highscorefont.render("Hi-Score", 1, (255, 255, 255))
+            display.blit(hi_score, (45, 530))
+            display.blit(highSCORE, (50, 550))
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
