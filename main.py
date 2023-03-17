@@ -931,8 +931,8 @@ class Game:
 
         while True:
             score_string=("0" * (7-len(str(score)))) + str(score)
-            high_score_string = ("0" * (7-len(str(score)))) + str(high_score)
-            if(score > high_score):
+            high_score_string = ("0" * (7-len(str(high_score)))) + str(high_score)
+            if(score > high_score) or (score_init > 0):
                 high_score = score
                 highScoreColor = (255, 255, 0)
 
