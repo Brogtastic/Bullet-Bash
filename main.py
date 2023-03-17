@@ -63,7 +63,7 @@ class Game:
         timer = 0
         full_health = 100
         enemy_full_health = 6
-        enemy_damage = 10
+        enemy_damage = 100
         ammo_plus = 4
         global score_to_add
         score_to_add = 0
@@ -272,6 +272,9 @@ class Game:
                 self.speed = 15
                 self.auto = auto
                 self.playerdirection = playerdirection
+                self.angle = angle
+                self.x_vel = x_vel
+                self.y_vel = y_vel
                 if (self.auto == True):
                     if ((self.enemy_x > self.x) and (((self.enemy_y - self.y) >= 0) and (self.enemy_y - self.y) <= 50)):
                         # "right"
@@ -387,7 +390,7 @@ class Game:
                         self.y += self.speed / 1.7
                         self.x += self.speed / 1.7
                 bullet_rect = pygame.Rect(self.x - 7, self.y - 7, 10, 10)
-                if (self.is_alive == True) and (player.dead == False):
+                if (self.is_alive == True) and (player.dead == False) and (self.exploded == False):
                     pygame.draw.circle(display, self.color, (self.x, self.y), 7)
                 else:
                     if (self.exploded == False) and (player.dead == False):
@@ -396,11 +399,11 @@ class Game:
                         self.exploded = True
                     player_bullets.remove(self)
                     self.is_alive = False
-                player_bullets_track[self.placement - 1] = ((self.x, self.y, self.enemy_x, self.enemy_y, self.direction, self.color, self.placement, self.is_alive, self.exploded, self.angle, self.x_vel, self.y_vel))
+                player_bullets_track[self.placement - 1] = ((self.x, self.y, self.enemy_x, self.enemy_y, self.direction, self.color, self.placement, self.is_alive, self.exploded, self.angle, self.x_vel, self.y_vel, self.auto, self.playerdirection))
                 return bullet_rect
 
             def update(self):
-                player_bullets_track[self.placement - 1] = ((self.x, self.y, self.enemy_x, self.enemy_y, self.direction, self.color, self.placement, self.is_alive, self.exploded, self.angle, self.x_vel, self.y_vel))
+                player_bullets_track[self.placement - 1] = ((self.x, self.y, self.enemy_x, self.enemy_y, self.direction, self.color, self.placement, self.is_alive, self.exploded, self.angle, self.x_vel, self.y_vel, self.auto, self.playerdirection))
                 if((self.x < 0) or (self.x > 800) or (self.y < 0) or (self.y > 600)):
                     self.is_alive = False
 
@@ -595,6 +598,7 @@ class Game:
                 self.color = color
                 self.enemyx = enemyx
                 self.enemyy = enemyy
+                self.gameover = False
 
             def main(self):
                 if(self.color != "blue"):
@@ -639,6 +643,8 @@ class Game:
                             self.y -= self.speed / self.timer
                         else:
                             self.y += self.speed / self.timer
+                    elif (self.timer <= 0):
+                        self.gameover = True
 
             def update(self, dt):
                 self.timer -= 1
@@ -923,11 +929,15 @@ class Game:
         textfont = pygame.font.SysFont("monospace", 60)
         replay_rect = pygame.Rect(195, 277, 226, 60)
         main_menu_rect = pygame.Rect(195, 352, 335, 60)
+        game_over_screen_rect = pygame.Rect(100, 75, 630, 400)
+        game_over_screen_outline = pygame.Rect(100, 75, 630, 400)
 
         on_replay = False
         on_main_menu = False
         replay_click = False
         main_menu_click = False
+
+        gameover = False
 
         while True:
             score_string=("0" * (7-len(str(score)))) + str(score)
@@ -942,11 +952,17 @@ class Game:
             textDIED = diedfont.render("YOU DIED", 1, (255, 255, 255))
             textREPLAY = textfont.render("REPLAY", 1, (255, 255, 255))
             textMAINMENU = textfont.render("MAIN MENU", 1, (255, 255, 255))
+            newHIGHSCORE = scorefont.render("NEW HIGH SCORE!", 1, highScoreColor)
             display.blit(textSCORE, (325, 15))
             display.blit(highSCORE, (635, 35))
             display.blit(hi_score, (630, 15))
             if(player.health <= 0):
                 mixer.music.stop()
+            if(gameover == True):
+                pygame.draw.rect(display, backgroundColor, (game_over_screen_rect), 700, 10)
+                pygame.draw.rect(display, (255, 255, 255), (game_over_screen_outline), 10, 10)
+                if(highScoreColor != (255, 255, 255)):
+                    display.blit(newHIGHSCORE, (250, 205))
                 pygame.draw.rect(display, replaycolor, (replay_rect))
                 pygame.draw.rect(display, mainmenucolor, (main_menu_rect))
                 display.blit(textDIED, (175, 100))
@@ -1220,6 +1236,8 @@ class Game:
                 particle.update(dt)
                 if(particle.timer < 0):
                     death_particles.remove(particle)
+                if (particle.gameover == True):
+                    gameover = True
 
             for particle in bullet_particles:
                 particle.main()
@@ -1289,9 +1307,9 @@ class Game:
                 bullet_rect = bullet.main(display)
                 for enemy in enemies:
                     if bullet_rect.colliderect(enemy.get_rect()):
-                        if (enemy.health > 0) and ((enemy.color == "red") and ((bullet.color == bulletColor)) or ((enemy.color == "yellow") and (bullet.color == bulletColor2))):
+                        if (enemy.health > 0)  and (bullet.exploded == False) and ((enemy.color == "red") and ((bullet.color == bulletColor)) or ((enemy.color == "yellow") and (bullet.color == bulletColor2))):
                             score_to_add += 1
-                            enemy.was_hit(bullet.x, bullet.y, bullet_damage)
+                            enemy.was_hit(bullet.x, bullet.y, bullet_damage + 1)
                             bullet.is_alive = False
 
 
@@ -1348,16 +1366,29 @@ class PauseGame:
         main_menu_rect = pygame.Rect(247, 405, 310, 60)
         mainmenucolor = (26, 100, 64, 25)
         resumecolor = backgroundColor
+        checkboxhighlightcolor = backgroundColor
+
+        checkboxposx = 0
+        checkboxposy = 117
+        aimingfont = pygame.font.SysFont("Verdana", 15)
+        checkbox_highlight_rect = pygame.Rect(51 + checkboxposx, 425 + checkboxposy, 20, 20)
+        checkbox_rect = pygame.Rect(51 + checkboxposx, 425 + checkboxposy, 20, 20)
+        aimText = aimingfont.render("Auto-Aiming", 1, (255, 255, 255))
+
         on_resume = False
         on_main_menu = False
         soundClicked = False
+        checkboxClicked = False
+        onCheckbox = False
         clickdown = 0
         soundcolor = backgroundColor
+        autoAiming = aiming_cont
 
         HOVER_TIME = pygame.USEREVENT + 1
         pygame.time.set_timer(HOVER_TIME, 3)
 
         while True:
+            display.fill(backgroundColor)
             pauseText = titlefont.render("PAUSE", 1, (255, 255, 255))
             resumeText = textfont.render("RESUME", 1, (255, 255, 255))
             mainMenuText = textfont.render("MAIN MENU", 1, (255, 255, 255))
@@ -1385,6 +1416,17 @@ class PauseGame:
                 pygame.draw.line(display, (255, 255, 255), (761, 534), (780, 563), 5)
                 pygame.draw.line(display, (255, 255, 255), (761, 563), (780, 534), 5)
 
+
+            pygame.draw.rect(display, checkboxhighlightcolor, (checkbox_highlight_rect), 10, 5)
+            pygame.draw.rect(display, (255, 255, 255), (checkbox_rect), 3, 5)
+            display.blit(aimText, (78 + checkboxposx, 425 + checkboxposy))
+
+            if autoAiming == True:
+                pygame.draw.line(display, (255, 255, 255), (61 + checkboxposx, 438 + checkboxposy), (72 + checkboxposx, 420 + checkboxposy), 5)
+                pygame.draw.line(display, (255, 255, 255), (56 + checkboxposx, 430 + checkboxposy), (62 + checkboxposx, 438 + checkboxposy), 5)
+
+            pygame.display.update()
+
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
             pygame.mouse.set_visible(True)
@@ -1410,21 +1452,33 @@ class PauseGame:
                 onSound = False
                 soundcolor = backgroundColor
 
-            pygame.display.update()
+            if (checkbox_highlight_rect.collidepoint(mouse_x, mouse_y)):
+                onCheckbox = True
+                checkboxhighlightcolor = (255, 100, 100, 0)
+            else:
+                onCheckbox = False
+                checkboxhighlightcolor = backgroundColor
+
+
+
 
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if (on_resume == True) and (clickdown == 1):
-                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont, high_score_cont, mute)
+                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, autoAiming, high_score_cont, mute)
                         if (on_main_menu == True) and (clickdown == 2):
-                            MainMenu.main(MainMenu(), False, aiming_cont, high_score_cont, 0, mute)
+                            MainMenu.main(MainMenu(), False, autoAiming, high_score_cont, 0, mute)
                         if(onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
                             pygame.mixer.music.play(-1)
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
                             mixer.music.stop()
+                        if(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == True):
+                            autoAiming = False
+                        elif(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == False):
+                            autoAiming = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if (on_resume == True):
@@ -1437,9 +1491,13 @@ class PauseGame:
                             soundClicked = True
                         else:
                             soundClicked = False
+                        if(onCheckbox == True):
+                            checkboxClicked = True
+                        else:
+                            checkboxClicked = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont, high_score_cont, mute)
+                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, autoAiming, high_score_cont, mute)
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
                     pygame.quit()
