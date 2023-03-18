@@ -1519,7 +1519,7 @@ class MainMenu:
         titlefont = pygame.font.SysFont("Verdana", 80)
         highscorefont = pygame.font.SysFont("monospace", 20)
         play_rect = pygame.Rect(247, 303, 130, 60)
-        option_rect = pygame.Rect(247, 403, 290, 60)
+        option_rect = pygame.Rect(247, 403, 360, 60)
         highlightcolor = (255, 100, 100, 0)
         soundcolor = backgroundColor
         on_play = False
@@ -1551,7 +1551,7 @@ class MainMenu:
 
             titleText = titlefont.render("BULLET BASH", 1, (255, 255, 255))
             playText = textfont.render("PLAY", 1, (255, 255, 255))
-            controlsText = textfont.render("CONTROLS", 1, (255, 255, 255))
+            controlsText = textfont.render("HOW TO PLAY", 1, (255, 255, 255))
             pygame.draw.rect(display, playcolor, (play_rect))
             pygame.draw.rect(display, optioncolor, (option_rect))
             display.blit(titleText, (135, 40))
