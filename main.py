@@ -25,6 +25,7 @@ display = pygame.display.set_mode(size)
 pygame.display.set_caption('Bullet Bash')
 
 backgroundColor = (26, 32, 64, 25)
+backgroundColor1 = (0, 0, 0)
 
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
@@ -1519,7 +1520,7 @@ class MainMenu:
         titlefont = pygame.font.SysFont("Verdana", 80)
         highscorefont = pygame.font.SysFont("monospace", 20)
         play_rect = pygame.Rect(247, 303, 130, 60)
-        option_rect = pygame.Rect(247, 403, 360, 60)
+        option_rect = pygame.Rect(247, 403, 265, 60)
         highlightcolor = (255, 100, 100, 0)
         soundcolor = backgroundColor
         on_play = False
@@ -1551,7 +1552,7 @@ class MainMenu:
 
             titleText = titlefont.render("BULLET BASH", 1, (255, 255, 255))
             playText = textfont.render("PLAY", 1, (255, 255, 255))
-            controlsText = textfont.render("HOW TO PLAY", 1, (255, 255, 255))
+            controlsText = textfont.render("PRACTICE", 1, (255, 255, 255))
             pygame.draw.rect(display, playcolor, (play_rect))
             pygame.draw.rect(display, optioncolor, (option_rect))
             display.blit(titleText, (135, 40))
@@ -2349,7 +2350,6 @@ class Controls:
             pygame.draw.rect(display, buttonPressColorD, (right_box_rect_fill1), 0, 5)
             pygame.draw.rect(display, buttonPressColorW, (top_center_box_rect_fill1), 0, 5)
 
-
             upArrow = keyfont.render("^", 1, (255, 255, 255))
             downArrow = keyfont.render("v", 1, (255, 255, 255))
             rightArrow = keyfont.render(">", 1, (255, 255, 255))
@@ -2806,8 +2806,226 @@ class Controls:
             pygame.display.update()
 
 
+tutorialFont = pygame.font.SysFont("Verdana", 30)
+smallerFont = pygame.font.SysFont("Verdana", 25)
+keyfont = pygame.font.SysFont("Verdana", 65)
+
+bulletColor = (245, 122, 113, 96)
+bulletColor2 = (245, 178, 64, 96)
+lightred = (253, 46, 41, 0)
+lightyellow = (224, 141, 0, 0)
+highlightcolor = (255, 100, 100, 0)
+
+mainmenucolor = (26, 100, 64, 25)
+resumecolor = backgroundColor1
+buttonPressColorLeft = backgroundColor1
+buttonPressColorRight = backgroundColor1
+buttonPressColorUp = backgroundColor1
+buttonPressColorDown = backgroundColor1
+buttonPressColorZ = lightred
+buttonPressColorX = lightyellow
+
+buttonPressColorA = backgroundColor1
+buttonPressColorD = backgroundColor1
+buttonPressColorW = backgroundColor1
+buttonPressColorS = backgroundColor1
+checkboxhighlightcolor = backgroundColor1
+rightClickPress = lightyellow
+leftClickPress = lightred
+
+backArrowColor = backgroundColor1
+soundcolor = backgroundColor1
+
+arrowx = 215
+arrowy = -325
+
+arrowxz = 225
+arrowyz = -30
+
+arrowxx = 150
+arrowyx = 63
+
+wasdx = 10
+wasdy = -70
+
+wasdxk = 218
+wasdyk = -325
+
+left_box_rect_fill = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
+left_box_rect = pygame.Rect(58 + arrowx, 502 + arrowy, 65, 65)
+center_box_rect_fill = pygame.Rect(135 + arrowx, 502 + arrowy, 65, 65)
+center_box_rect = pygame.Rect(135 + arrowx, 502 + arrowy, 65, 65)
+top_center_box_rect_fill = pygame.Rect(135 + arrowx, 422 + arrowy, 65, 65)
+top_center_box_rect = pygame.Rect(135 + arrowx, 422 + arrowy, 65, 65)
+right_box_rect_fill = pygame.Rect(212 + arrowx, 502 + arrowy, 65, 65)
+right_box_rect = pygame.Rect(212 + arrowx, 502 + arrowy, 65, 65)
+z_box_rect_fill = pygame.Rect(0 + arrowxz, 340 + arrowyz, 65, 65)
+z_box_rect = pygame.Rect(0 + arrowxz, 340 + arrowyz, 65, 65)
+x_box_rect_fill = pygame.Rect(75 + arrowxx, 340 + arrowyx, 65, 65)
+x_box_rect = pygame.Rect(75 + arrowxx, 340 + arrowyx, 65, 65)
+
+back_arrow_rect = pygame.Rect(50, 43, 50, 20)
+back_arrow_clickable = pygame.Rect(18, 30, 83, 50)
+
+onBackArrow = False
+backArrowClicked = False
+
+page = 1
+
+while True:
+    display.fill((0,0,0))
+
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+
+    pageCount = tutorialFont.render((str(page)) + " / 3", 1, (255, 255, 255))
+    display.blit(pageCount, (25, 544))
+
+    if(page < 3):
+        pEnter = tutorialFont.render("Press ENTER to continue", 1, (154, 205, 50))
+        display.blit(pEnter, (225, 544))
+    else:
+        pEnter = tutorialFont.render("Press ENTER to play", 1, (154, 205, 50))
+        display.blit(pEnter, (250, 544))
+
+    if(page > 1):
+        pygame.draw.rect(display, backArrowColor, (back_arrow_clickable))
+        pygame.draw.rect(display, (255, 255, 255), (back_arrow_rect))
+        triangle_vertices = [(18, 54), (54, 30), (54, 75)]
+        pygame.draw.polygon(display, (255, 255, 255), triangle_vertices)
+
+    if back_arrow_clickable.collidepoint(mouse_x, mouse_y) and page > 1:
+        backArrowColor = highlightcolor
+        onBackArrow = True
+    else:
+        backArrowColor = backgroundColor1
+        onBackArrow = False
+
+    if (page == 1):
+        firstLine = tutorialFont.render("Use the arrow keys to move", 1, (255, 255, 255))
+        display.blit(firstLine, (175, 25))
+        press1 = tutorialFont.render("Press          key to shoot red bullets", 1, (255, 255, 255))
+        display.blit(press1, (-105 + arrowxz, 352 + arrowyz))
+        press2 = tutorialFont.render("Press          key to shoot yellow bullets", 1, (255, 255, 255))
+        display.blit(press2, (-30 + arrowxx, 350 + arrowyx))
+
+        upArrow = keyfont.render("^", 1, (255, 255, 255))
+        downArrow = keyfont.render("v", 1, (255, 255, 255))
+        rightArrow = keyfont.render(">", 1, (255, 255, 255))
+        leftArrow = keyfont.render("<", 1, (255, 255, 255))
+        zKey = keyfont.render("z", 1, (255, 255, 255))
+        xKey = keyfont.render("x", 1, (255, 255, 255))
+        display.blit(upArrow, (141 + arrowx, 420 + arrowy))
+        display.blit(downArrow, (149 + arrowx, 485 + arrowy))
+        display.blit(rightArrow, (219 + arrowx, 490 + arrowy))
+        display.blit(leftArrow, (62 + arrowx, 490 + arrowy))
+        display.blit(zKey, (15 + arrowxz, 325 + arrowyz))
+        display.blit(xKey, (89 + arrowxx, 325 + arrowyx))
+
+        pygame.draw.rect(display, (255, 255, 255), (left_box_rect), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (center_box_rect), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (right_box_rect), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (top_center_box_rect), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (z_box_rect), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (x_box_rect), 5, 5)
+    if (page == 2):
+        firstLine = tutorialFont.render("You can also use WASD to move", 1, (255, 255, 255))
+        display.blit(firstLine, (152, 25))
+        press1 = tutorialFont.render("Left Click          to shoot red bullets", 1, (255, 255, 255))
+        display.blit(press1, (-105 + arrowxz, 322 + arrowyz))
+        press2 = tutorialFont.render("Right Click         to shoot yellow bullets", 1, (255, 255, 255))
+        display.blit(press2, (-30 + arrowxx, 350 + arrowyx))
+
+        left_box_rect_fill1 = pygame.Rect(58 + wasdxk, 502 + wasdyk, 65, 65)
+        left_box_rect1 = pygame.Rect(58 + wasdxk, 502 + wasdyk, 65, 65)
+        center_box_rect_fill1 = pygame.Rect(135 + wasdxk, 502 + wasdyk, 65, 65)
+        center_box_rect1 = pygame.Rect(135 + wasdxk, 502 + wasdyk, 65, 65)
+        top_center_box_rect_fill1 = pygame.Rect(135 + wasdxk, 422 + wasdyk, 65, 65)
+        top_center_box_rect1 = pygame.Rect(135 + wasdxk, 422 + wasdyk, 65, 65)
+        right_box_rect_fill1 = pygame.Rect(212 + wasdxk, 502 + wasdyk, 65, 65)
+        right_box_rect1 = pygame.Rect(212 + wasdxk, 502 + wasdyk, 65, 65)
+        mouse_rect = pygame.Rect(275 + wasdx, 340 + wasdy, 65, 100)
+        left_click1 = pygame.Rect(285 + wasdx, 350 + wasdy, 25, 25)
+        left_click2 = pygame.Rect(280 + wasdx, 358 + wasdy, 5, 20)
+        left_click3 = pygame.Rect(290 + wasdx, 345 + wasdy, 17, 5)
+        mouse_rect_hor = pygame.Rect(275 + wasdx, 375 + wasdy, 65, 5)
+        mouse_rect_vert = pygame.Rect(306 + wasdx, 340 + wasdy, 5, 37)
+
+        mouse_rect2 = pygame.Rect(290 + wasdx, 470 + wasdy, 65, 100)
+        right_click1 = pygame.Rect(321 + wasdx, 480 + wasdy, 25, 25)
+        right_click2 = pygame.Rect(345 + wasdx, 485 + wasdy, 5, 20)
+        right_click3 = pygame.Rect(325 + wasdx, 475 + wasdy, 15, 5)
+        mouse_rect_hor2 = pygame.Rect(290 + wasdx, 505 + wasdy, 65, 5)
+        mouse_rect_vert2 = pygame.Rect(321 + wasdx, 470 + wasdy, 5, 37)
+
+        wKey = keyfont.render("w", 1, (255, 255, 255))
+        sKey = keyfont.render("s", 1, (255, 255, 255))
+        dKey = keyfont.render("d", 1, (255, 255, 255))
+        aKey = keyfont.render("a", 1, (255, 255, 255))
+
+        display.blit(wKey, (140 + wasdxk, 407 + wasdyk))
+        display.blit(sKey, (149 + wasdxk, 487 + wasdyk))
+        display.blit(dKey, (222 + wasdxk, 490 + wasdyk))
+        display.blit(aKey, (70 + wasdxk, 487 + wasdyk))
+        pygame.draw.rect(display, leftClickPress, (left_click1), 100)
+        pygame.draw.rect(display, leftClickPress, (left_click2), 100)
+        pygame.draw.rect(display, leftClickPress, (left_click3), 100)
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect), 5, 50)
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect_hor))
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect_vert))
+
+        pygame.draw.rect(display, rightClickPress, (right_click1), 100)
+        pygame.draw.rect(display, rightClickPress, (right_click2), 100)
+        pygame.draw.rect(display, rightClickPress, (right_click3), 100)
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect2), 5, 50)
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect_hor2))
+        pygame.draw.rect(display, (255, 255, 255), (mouse_rect_vert2))
+
+        pygame.draw.rect(display, (255, 255, 255), (left_box_rect1), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (center_box_rect1), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (right_box_rect1), 5, 5)
+        pygame.draw.rect(display, (255, 255, 255), (top_center_box_rect1), 5, 5)
+    if (page == 3):
+        redEnemies = smallerFont.render("Red enemies can be destroyed with Red bullets", 1, bulletColor)
+        display.blit(redEnemies, (100, 150))
+
+        yellowEnemies = smallerFont.render("Yellow enemies can be destroyed with Yellow bullets", 1, bulletColor2)
+        display.blit(yellowEnemies, (75, 200))
+
+        px = 170
+        py = 100
+
+        pauseIt = smallerFont.render("Press       key to pause the game", 1, (255, 255, 255))
+        display.blit(pauseIt, (33 + px, 272 + py))
+
+        pKey = smallerFont.render("p", 1, (255, 255, 255))
+        display.blit(pKey, (125 + px, 270 + py))
+        p_box_rect = pygame.Rect(112 + px, 270 + py, 40, 40)
+        pygame.draw.rect(display, (255, 255, 255), (p_box_rect), 5, 5)
 
 
+    pygame.display.update()
 
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                print(str(mouse_x) + ", " + str(mouse_y))
+                if(onBackArrow == True):
+                    backArrowClicked = True
+                else:
+                    backArrowClicked = False
+                    page += 1
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                if(backArrowClicked == True):
+                    page -= 1
+        if event.type == pygame.KEYDOWN:
+            if (event.key == pygame.K_RETURN or event.key == pygame.K_SPACE) and page == 3:
+                MainMenu.main(MainMenu(), False, True, 0, 0, False)
+            if (event.key == pygame.K_RETURN or event.key == pygame.K_SPACE) and page < 3:
+                page += 1
 
-MainMenu.main(MainMenu(), False, True, 0, 0, False)
+        if event.type == pygame.QUIT:
+            pygame.display.quit()
+            pygame.quit()
+            sys.exit()
+
