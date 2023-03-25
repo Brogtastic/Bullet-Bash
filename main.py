@@ -30,7 +30,6 @@ class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
         mute = mute_init
         music_playing = music_playing_init
-        print(music_playing)
         if(mute == False) and (music_playing == False):
             mixer.music.load('Gameplay.wav')
             pygame.mixer.music.play(-1)
@@ -348,9 +347,6 @@ class Game:
                     self.angle = math.atan2(self.y - self.enemy_y, self.x - self.enemy_x)
                     self.x_vel = math.cos(self.angle) * self.speed
                     self.y_vel = math.sin(self.angle) * self.speed
-                    print("self.angle = " + str(self.angle))
-                    print("self.x_vel = " + str(math.cos(self.angle)))
-                    print("self.y_vel = " + str(math.sin(self.angle)))
                 elif (angle == 0 and x_vel == 0 and y_vel == 0):
                     self.angle = angle
                     self.x_vel = x_vel
@@ -1689,7 +1685,8 @@ class Controls:
         health_kit_sound = mixer.Sound('health kit pickup.wav')
         health_kit_sound.set_volume(highVolume)
 
-        playerColor = (119, 131, 225, 65)
+        #playerColor = (119, 131, 225, 65)
+        playerColor = (60, 168, 166, 66)
         highlightcolor = (255, 100, 100, 0)
         enemyColor = (168, 76, 69, 66)
         enemyColor2 = (168, 125, 52, 66)
@@ -2061,9 +2058,6 @@ class Controls:
                     self.angle = math.atan2(self.y - self.enemy_y, self.x - self.enemy_x)
                     self.x_vel = math.cos(self.angle) * self.speed
                     self.y_vel = math.sin(self.angle) * self.speed
-                    print("self.angle = " + str(self.angle))
-                    print("self.x_vel = " + str(math.cos(self.angle)))
-                    print("self.y_vel = " + str(math.sin(self.angle)))
                 elif (angle == 0 and x_vel == 0 and y_vel == 0):
                     self.angle = angle
                     self.x_vel = x_vel
@@ -2455,8 +2449,6 @@ class Controls:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        print("X POS: " + str(mouse_x))
-                        print("Y POS: " + str(mouse_y))
                         if(onBackArrow == True):
                             backArrowClicked = True
                         else:
@@ -3049,13 +3041,13 @@ class Tutorial:
                 pygame.draw.rect(display, (255, 255, 255), (x_box_rect), 5, 5)
             if (page == 3):
                 redEnemies = smallerFont.render("Red enemies can be destroyed with Red bullets", 1, bulletColor)
-                display.blit(redEnemies, (100, 150))
+                display.blit(redEnemies, (100, 100))
 
                 yellowEnemies = smallerFont.render("Yellow enemies can be destroyed with Yellow bullets", 1, bulletColor2)
-                display.blit(yellowEnemies, (75, 200))
+                display.blit(yellowEnemies, (75, 150))
 
                 px = 170
-                py = 0
+                py = -20
 
                 pauseIt = smallerFont.render("Press       key to pause the game", 1, (255, 255, 255))
                 display.blit(pauseIt, (33 + px, 272 + py))
@@ -3079,7 +3071,6 @@ class Tutorial:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        print(str(mouse_x) + ", " + str(mouse_y))
                         if(onBackArrow == True):
                             backArrowClicked = True
                         elif page == 3:
