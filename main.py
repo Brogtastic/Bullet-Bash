@@ -3,12 +3,14 @@ Bullet Bash
 Author: Michael Brogdon
 
 A crazy top-down shooter for crazy gamers like yourself
+
 '''
 
 import pygame
 import sys
 import math
 import random
+import asyncio
 from pygame import mixer
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
@@ -197,8 +199,8 @@ class Game:
                         self.target_y -= self.speed * 20
                     else:
                         self.target_y += self.speed * 20
-                
-                    
+
+
             def terminate(self, enemyx, enemyy):
                 if(self.dead == False):
                     red_die_sound.play()
@@ -2830,6 +2832,38 @@ class Controls:
 
 class Tutorial:
     def main(self, high_score_cont, mute_cont, music_playing):
+        full_ammunition = 45
+        class Ammo_Count_Display:
+            def __init__(self, y, ammo):
+                self.x = 60
+                self.y = y
+                self.width = 10
+                self.height = 20
+                self.ammo = ammo
+
+            def main(self):
+                for i in range(int(self.ammo)):
+                    pygame.draw.rect(display, bulletColor, (self.x + i * 15, self.y, self.width, self.height), 10, 3)
+                for j in range(int(full_ammunition - self.ammo)):
+                    pygame.draw.rect(display, bulletColor, (self.x + ((full_ammunition-1) * 15) - j*15, self.y, self.width, self.height), 2, 4)
+
+        class Ammo_Count_Display1:
+            def __init__(self, y, ammo):
+                self.x = 60
+                self.y = y + 25
+                self.width = 10
+                self.height = 20
+                self.ammo = ammo
+
+            def main(self):
+                for i in range(int(self.ammo)):
+                    pygame.draw.rect(display, bulletColor2, (self.x + i * 15, self.y, self.width, self.height), 10, 3)
+                for j in range(int(full_ammunition - self.ammo)):
+                    pygame.draw.rect(display, bulletColor2, (self.x + ((full_ammunition-1) * 15) - j*15, self.y, self.width, self.height), 2, 4)
+
+        ammo_count_display = Ammo_Count_Display(435, 35)
+        ammo_count_display1 = Ammo_Count_Display1(435, 40)
+
         tutorialFont = pygame.font.SysFont("Verdana", 30)
         smallerFont = pygame.font.SysFont("Verdana", 25)
         keyfont = pygame.font.SysFont("Verdana", 65)
@@ -2911,7 +2945,7 @@ class Tutorial:
                 display.blit(pEnter, (225, 544))
             else:
                 pEnter = tutorialFont.render("Press ENTER to play", 1, (154, 205, 50))
-                display.blit(pEnter, (250, 544))
+                display.blit(pEnter, (240, 544))
 
             if(page > 1):
                 pygame.draw.rect(display, backArrowColor, (back_arrow_clickable))
@@ -3021,7 +3055,7 @@ class Tutorial:
                 display.blit(yellowEnemies, (75, 200))
 
                 px = 170
-                py = 100
+                py = 0
 
                 pauseIt = smallerFont.render("Press       key to pause the game", 1, (255, 255, 255))
                 display.blit(pauseIt, (33 + px, 272 + py))
@@ -3030,6 +3064,14 @@ class Tutorial:
                 display.blit(pKey, (125 + px, 270 + py))
                 p_box_rect = pygame.Rect(112 + px, 270 + py, 40, 40)
                 pygame.draw.rect(display, (255, 255, 255), (p_box_rect), 5, 5)
+
+                ammoExplain1 = smallerFont.render("Your ammo will be displayed at the", 1, (169, 169, 169))
+                ammoExplain2 = smallerFont.render("bottom of the screen like this:", 1, (169, 169, 169))
+                display.blit(ammoExplain1, (190, 355))
+                display.blit(ammoExplain2, (220, 390))
+
+                ammo_count_display.main()
+                ammo_count_display1.main()
 
 
             pygame.display.update()
@@ -3040,6 +3082,8 @@ class Tutorial:
                         print(str(mouse_x) + ", " + str(mouse_y))
                         if(onBackArrow == True):
                             backArrowClicked = True
+                        elif page == 3:
+                            MainMenu.main(MainMenu(), False, True, high_score_cont, music_playing, mute_init)
                         else:
                             backArrowClicked = False
                             page += 1
@@ -3058,4 +3102,9 @@ class Tutorial:
                     pygame.quit()
                     sys.exit()
 
-Tutorial.main(Tutorial(), 0, False, False)
+async def main():
+    while True:
+        Tutorial.main(Tutorial(), 0, False, False)
+        await asyncio.sleep(0)
+
+asyncio.run(main())
