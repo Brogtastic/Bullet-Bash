@@ -2,12 +2,7 @@
 Bullet Bash
 Author: Michael Brogdon
 
-TODO:
-1.) Main Menu Art
-2.) Pause Screen Draw
-3.) SFX: Bullet Hit, Player Hurt, Player Dead
-4.) Conditional "Play Music" add boolean music_is_playing to arguments
-
+A crazy top-down shooter for crazy gamers like yourself
 '''
 
 import pygame
@@ -18,6 +13,7 @@ from pygame import mixer
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.mixer.init(44100, -16, 2, 64)
+pygame.mixer.music.set_volume(0.08)
 pygame.init()
 pygame.font.init()
 
@@ -29,16 +25,18 @@ backgroundColor = (26, 32, 64, 25)
 backgroundColor1 = (0, 0, 0)
 
 class Game:
-    def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_seconds_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
+    def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
         mute = mute_init
-        mixer.music.load('Gameplay.wav')
-        #pygame.mixer.music.play(-1, music_seconds_init / 1000.0)
-        if(mute == False):
+        music_playing = music_playing_init
+        print(music_playing)
+        if(mute == False) and (music_playing == False):
+            mixer.music.load('Gameplay.wav')
             pygame.mixer.music.play(-1)
+            music_playing = True
 
         if(mute == False):
-            lowVolume = 0.2
-            highVolume = 0.3
+            lowVolume = 0.015
+            highVolume = 0.02
         if(mute == True):
             lowVolume = 0
             highVolume = 0
@@ -1068,7 +1066,7 @@ class Game:
                         if (lastDirection == "right"):
                             lastDirection = "left"
                     if (event.key == pygame.K_p) and (player.health > 0):
-                        PauseGame.main(PauseGame(), ammunition, ammunition1, score, player.health, enemy_track, player.x, player.y, ammo_track, health_kit_track, player_bullets_click_track, player_bullets_track, music_seconds, auto_aiming, high_score, mute, score_to_add)
+                        PauseGame.main(PauseGame(), ammunition, ammunition1, score, player.health, enemy_track, player.x, player.y, ammo_track, health_kit_track, player_bullets_click_track, player_bullets_track, music_playing, auto_aiming, high_score, mute, score_to_add)
 
             keys = pygame.key.get_pressed()
 
@@ -1364,7 +1362,7 @@ class Game:
                 cursor_circle.main(display, mouse_x, mouse_y)
 
 class PauseGame:
-    def main(self, ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, aiming_cont, high_score_cont, mute_cont, score_to_add_cont):
+    def main(self, ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_playing_cont, aiming_cont, high_score_cont, mute_cont, score_to_add_cont):
         mute = mute_cont
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
@@ -1472,14 +1470,16 @@ class PauseGame:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if (on_resume == True) and (clickdown == 1):
-                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, autoAiming, high_score_cont, mute, score_to_add_cont)
+                            Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_playing_cont, autoAiming, high_score_cont, mute, score_to_add_cont)
                         if (on_main_menu == True) and (clickdown == 2):
                             MainMenu.main(MainMenu(), False, autoAiming, high_score_cont, 0, mute)
                         if(onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
+                            music_playing_cont = True
                             pygame.mixer.music.play(-1)
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
+                            music_playing_cont = False
                             mixer.music.stop()
                         if(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == True):
                             autoAiming = False
@@ -1503,19 +1503,21 @@ class PauseGame:
                             checkboxClicked = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_seconds_cont, autoAiming, high_score_cont, mute, score_to_add_cont)
+                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_playing, autoAiming, high_score_cont, mute, score_to_add_cont)
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
                     pygame.quit()
                     sys.exit()
 
 class MainMenu:
-    def main(self, myreplay, aiming_init, high_score_init, menu_music_seconds_init, mute_init):
+    def main(self, myreplay, aiming_init, high_score_init, music_playing_init, mute_init):
         mute = mute_init
-        mixer.music.load('Menu.wav')
+        music_playing = music_playing_init
         #pygame.mixer.music.play(-1, menu_music_seconds_init / 1000.0)
-        if(mute == False):
+        if(mute == False) and (music_playing == False):
+            mixer.music.load('Menu.wav')
             pygame.mixer.music.play(-1)
+            music_playing = True
 
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
@@ -1548,7 +1550,7 @@ class MainMenu:
 
         while True:
             if (myreplay == True):
-                Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0, auto_aiming_init, high_score, mute, 0)
+                Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, False, auto_aiming_init, high_score, mute, 0)
 
 
             pygame.mouse.set_visible(True)
@@ -1625,16 +1627,18 @@ class MainMenu:
                     if event.button == 1:
                         if(on_play == True) and (playclicked == True):
                             #ammunition, ammunition1, score, health, enmies, centerx, centery, ammo, health kits, clickbullets, bullets, music seconds,
-                            Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, 0, auto_aiming_init, high_score, mute, 0)
+                            Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, False, auto_aiming_init, high_score, mute, 0)
                         if (on_options == True) and (optionsclicked == True):
                             Controls.main(Controls(), aiming_init, high_score, mute)
                         if (on_tutorial == True) and (tutorialclicked == True):
-                            Tutorial.main(Tutorial(), high_score, mute)
+                            Tutorial.main(Tutorial(), high_score, mute, music_playing)
                         if (onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
+                            music_playing = True
                             pygame.mixer.music.play(-1)
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
+                            music_playing = False
                             mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -1662,8 +1666,8 @@ class Controls:
         mute = mute_init
 
         if (mute == False):
-            lowVolume = 0.2
-            highVolume = 0.3
+            lowVolume = 0.01
+            highVolume = 0.02
         if (mute == True):
             lowVolume = 0
             highVolume = 0
@@ -2825,7 +2829,7 @@ class Controls:
             pygame.display.update()
 
 class Tutorial:
-    def main(self, high_score_cont, mute_cont):
+    def main(self, high_score_cont, mute_cont, music_playing):
         tutorialFont = pygame.font.SysFont("Verdana", 30)
         smallerFont = pygame.font.SysFont("Verdana", 25)
         keyfont = pygame.font.SysFont("Verdana", 65)
@@ -3045,7 +3049,7 @@ class Tutorial:
                             page -= 1
                 if event.type == pygame.KEYDOWN:
                     if (event.key == pygame.K_RETURN or event.key == pygame.K_SPACE) and page == 3:
-                        MainMenu.main(MainMenu(), False, True, high_score_cont, 0, mute_init)
+                        MainMenu.main(MainMenu(), False, True, high_score_cont, music_playing, mute_init)
                     if (event.key == pygame.K_RETURN or event.key == pygame.K_SPACE) and page < 3:
                         page += 1
 
@@ -3054,4 +3058,4 @@ class Tutorial:
                     pygame.quit()
                     sys.exit()
 
-Tutorial.main(Tutorial(), 0, False)
+Tutorial.main(Tutorial(), 0, False, False)
