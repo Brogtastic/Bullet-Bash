@@ -33,8 +33,6 @@ if(mute_save == 1):
 else:
     mute_save_bool = False
 
-print(mute_save_bool)
-
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
         mute = mute_init
@@ -956,9 +954,10 @@ class Game:
         while True:
             score_string=("0" * (7-len(str(score)))) + str(score)
             high_score_string = ("0" * (7-len(str(high_score)))) + str(high_score)
+            if ((score > high_score) and (score != 0)) or (highScoreGet == True):
+                highScoreColor = (255, 255, 0)
             if((score >= high_score) and (score != 0)) or (highScoreGet == True):
                 high_score = score
-                highScoreColor = (255, 255, 0)
                 with open('BulletBashSaveFile.txt', 'w') as file:
                     file.write(str(high_score) + '\n' + str(mute_int))
 
@@ -1530,10 +1529,8 @@ class PauseGame:
 
 class MainMenu:
     def main(self, myreplay, aiming_init, high_score_init, music_playing_init, mute_init):
-
         mute = mute_init
         music_playing = music_playing_init
-        #pygame.mixer.music.play(-1, menu_music_seconds_init / 1000.0)
         if(mute == False) and (music_playing == False):
             mixer.music.load('Menu.wav')
             pygame.mixer.music.play(-1)
@@ -1542,20 +1539,25 @@ class MainMenu:
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
         highscorefont = pygame.font.SysFont("monospace", 20)
+        resetfont = pygame.font.SysFont("monospace", 22)
         play_rect = pygame.Rect(247, 203, 130, 60)
         option_rect = pygame.Rect(247, 303, 265, 60)
         tutorial_rect = pygame.Rect(247, 403, 265, 60)
+        reset_rect = pygame.Rect(153, 540, 75, 27)
+        reset_appear_rect = pygame.Rect(0, 490, 280, 150)
         highlightcolor = (255, 100, 100, 0)
         soundcolor = backgroundColor
         on_play = False
         on_options = False
         on_tutorial = False
+        on_reset = False
         optioncolor = backgroundColor
         playcolor = backgroundColor
         tutorialcolor = backgroundColor
         playclicked = False
         optionsclicked = False
         tutorialclicked = False
+        resetclicked = False
 
         HOVER_TIME = pygame.USEREVENT + 1
         pygame.time.set_timer(HOVER_TIME, 3)
@@ -1580,6 +1582,7 @@ class MainMenu:
             playText = textfont.render("PLAY", 1, (255, 255, 255))
             controlsText = textfont.render("PRACTICE", 1, (255, 255, 255))
             tutorialText = textfont.render("TUTORIAL", 1, (255, 255, 255))
+            resetText = resetfont.render("RESET", 1, (255, 0, 0))
             pygame.draw.rect(display, playcolor, (play_rect))
             pygame.draw.rect(display, optioncolor, (option_rect))
             pygame.draw.rect(display, tutorialcolor, (tutorial_rect))
@@ -1638,6 +1641,13 @@ class MainMenu:
             else:
                 onSound = False
                 soundcolor = backgroundColor
+            if reset_rect.collidepoint(mouse_x, mouse_y):
+                pygame.draw.rect(display, highlightcolor, (reset_rect))
+                on_reset = True
+            else:
+                on_reset = False
+            if reset_appear_rect.collidepoint(mouse_x, mouse_y):
+                display.blit(resetText, (158, 541))
 
             pygame.display.update()
 
@@ -1651,6 +1661,14 @@ class MainMenu:
                             Controls.main(Controls(), aiming_init, high_score, mute)
                         if (on_tutorial == True) and (tutorialclicked == True):
                             Tutorial.main(Tutorial(), high_score, mute, music_playing)
+                        if (on_reset == True) and (resetclicked == True):
+                            high_score = 0
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(0) + '\n')
+                                if(mute == True):
+                                    file.write(str(1))
+                                else:
+                                    file.write(str(0))
                         if (onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
                             with open('BulletBashSaveFile.txt', 'w') as file:
@@ -1668,16 +1686,20 @@ class MainMenu:
                             mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        print("x: " + str(mouse_x) + " y: " + str(mouse_y))
                         if(on_play == True):
                             playclicked = True
                         elif(on_options == True):
                             optionsclicked = True
                         elif(on_tutorial == True):
                             tutorialclicked = True
+                        elif(on_reset == True):
+                            resetclicked = True
                         else:
                             playclicked = False
                             optionsclicked = False
                             tutorialclicked = False
+                            resetclicked = False
                         if(onSound == True):
                             soundClicked = True
                         else:
