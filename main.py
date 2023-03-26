@@ -1,9 +1,7 @@
 '''
 Bullet Bash
 Author: Michael Brogdon
-
 A crazy top-down shooter for crazy gamers like yourself
-
 '''
 
 import pygame
@@ -25,6 +23,17 @@ pygame.display.set_caption('Bullet Bash')
 
 backgroundColor = (26, 32, 64, 25)
 backgroundColor1 = (0, 0, 0)
+
+with open('BulletBashSaveFile.txt', 'r') as file:
+    high_score_save = int(file.readline())
+    mute_save = int(file.readline())
+
+if(mute_save == 1):
+    mute_save_bool = True
+else:
+    mute_save_bool = False
+
+print(mute_save_bool)
 
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
@@ -841,8 +850,6 @@ class Game:
                 elif (self.timer > 0) and (self.color == bulletColor2):
                     pygame.draw.circle(display, self.color, (self.x, self.y), self.size * self.timer / 7)
 
-
-
         #Health_Kit(300, 300, 45, 25)
 
         #Initialize Player position and size
@@ -941,12 +948,19 @@ class Game:
         else:
             highScoreGet = False
 
+        if(mute == False):
+            mute_int = 0
+        else:
+            mute_int = 1
+
         while True:
             score_string=("0" * (7-len(str(score)))) + str(score)
             high_score_string = ("0" * (7-len(str(high_score)))) + str(high_score)
             if((score >= high_score) and (score != 0)) or (highScoreGet == True):
                 high_score = score
                 highScoreColor = (255, 255, 0)
+                with open('BulletBashSaveFile.txt', 'w') as file:
+                    file.write(str(high_score) + '\n' + str(mute_int))
 
             textSCORE = scorefont.render(score_string, 1, (255, 255, 255))
             highSCORE = highscorefont.render(high_score_string, 1, highScoreColor)
@@ -1473,10 +1487,17 @@ class PauseGame:
                             MainMenu.main(MainMenu(), False, autoAiming, high_score_cont, 0, mute)
                         if(onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_cont))
+                                file.write('\n0')
                             music_playing_cont = True
+                            mixer.music.load('Gameplay.wav')
                             pygame.mixer.music.play(-1)
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_cont))
+                                file.write('\n1')
                             music_playing_cont = False
                             mixer.music.stop()
                         if(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == True):
@@ -1509,6 +1530,7 @@ class PauseGame:
 
 class MainMenu:
     def main(self, myreplay, aiming_init, high_score_init, music_playing_init, mute_init):
+
         mute = mute_init
         music_playing = music_playing_init
         #pygame.mixer.music.play(-1, menu_music_seconds_init / 1000.0)
@@ -1546,11 +1568,10 @@ class MainMenu:
         auto_aiming_init = aiming_init
         high_score = high_score_init
 
+        if (myreplay == True):
+            Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, False, auto_aiming_init, high_score, mute, 0)
+
         while True:
-            if (myreplay == True):
-                Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, False, auto_aiming_init, high_score, mute, 0)
-
-
             pygame.mouse.set_visible(True)
 
             display.fill(backgroundColor)
@@ -1632,10 +1653,17 @@ class MainMenu:
                             Tutorial.main(Tutorial(), high_score, mute, music_playing)
                         if (onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score))
+                                file.write('\n0')
                             music_playing = True
+                            mixer.music.load('Menu.wav')
                             pygame.mixer.music.play(-1)
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score))
+                                file.write('\n1')
                             music_playing = False
                             mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -2474,6 +2502,9 @@ class Controls:
                                 player.auto = True
                         if(soundClicked == True) and (onSound == True) and (mute == False):
                             mute = True
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_init))
+                                file.write('\n1')
                             mixer.music.stop()
                             lowVolume, highVolume = 0, 0
                             red_bullet_sound.set_volume(lowVolume)
@@ -2485,6 +2516,10 @@ class Controls:
                             health_kit_sound.set_volume(highVolume)
                         elif (soundClicked == True) and (onSound == True) and (mute == True):
                             mute = False
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_init))
+                                file.write('\n0')
+                            mixer.music.load('Gameplay.wav')
                             pygame.mixer.music.play(-1)
                             lowVolume, highvolume = 0.2, 0.3
                             red_bullet_sound.set_volume(lowVolume)
@@ -3093,9 +3128,4 @@ class Tutorial:
                     pygame.quit()
                     sys.exit()
 
-async def main():
-    while True:
-        Tutorial.main(Tutorial(), 0, False, False)
-        await asyncio.sleep(0)
-
-asyncio.run(main())
+Tutorial.main(Tutorial(), high_score_save, mute_save, False)
