@@ -27,11 +27,18 @@ backgroundColor1 = (0, 0, 0)
 with open('BulletBashSaveFile.txt', 'r') as file:
     high_score_save = int(file.readline())
     mute_save = int(file.readline())
+    tutorial_happen_save = int(file.readline())
+    auto_aim_save = int(file.readline())
 
 if(mute_save == 1):
     mute_save_bool = True
 else:
     mute_save_bool = False
+
+if(auto_aim_save == 1):
+    auto_aim_bool = True
+else:
+    auto_aim_bool = False
 
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
@@ -154,7 +161,7 @@ class Game:
                 return pygame.Rect(self.x, self.y, self.width, self.height)
 
             def bullet_recoil_click(self, mouse_x, mouse_y, direction, factor):
-                if (self.auto == True):
+                if (self.auto == True) or (cursor_circle.visible == True):
                     if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
                         direction = "right"
                     if ((mouse_x < self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
@@ -959,7 +966,16 @@ class Game:
             if((score >= high_score) and (score != 0)) or (highScoreGet == True):
                 high_score = score
                 with open('BulletBashSaveFile.txt', 'w') as file:
-                    file.write(str(high_score) + '\n' + str(mute_int))
+                    file.write(str(high_score))
+                    if(mute == True):
+                        file.write('\n1')
+                    else:
+                        file.write('\n0')
+                    file.write('\n1')
+                    if (auto_aiming == False):
+                        file.write('\n0')
+                    else:
+                        file.write('\n1')
 
             textSCORE = scorefont.render(score_string, 1, (255, 255, 255))
             highSCORE = highscorefont.render(high_score_string, 1, highScoreColor)
@@ -1489,6 +1505,11 @@ class PauseGame:
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score_cont))
                                 file.write('\n0')
+                                file.write('\n1')
+                                if (autoAiming == False):
+                                    file.write('\n0')
+                                else:
+                                    file.write('\n1')
                             music_playing_cont = True
                             mixer.music.load('Gameplay.wav')
                             pygame.mixer.music.play(-1)
@@ -1497,12 +1518,33 @@ class PauseGame:
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score_cont))
                                 file.write('\n1')
+                                file.write('\n1')
+                                if(autoAiming == False):
+                                    file.write('\n0')
+                                else:
+                                    file.write('\n1')
                             music_playing_cont = False
                             mixer.music.stop()
                         if(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == True):
                             autoAiming = False
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_cont))
+                                if (mute == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
+                                file.write('\n1')
+                                file.write('\n0')
                         elif(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == False):
                             autoAiming = True
+                            with open('BulletBashSaveFile.txt', 'w') as file:
+                                file.write(str(high_score_cont))
+                                if (mute == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
+                                file.write('\n1')
+                                file.write('\n1')
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if (on_resume == True):
@@ -1521,7 +1563,7 @@ class PauseGame:
                             checkboxClicked = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_playing, autoAiming, high_score_cont, mute, score_to_add_cont)
+                        Game.main(Game(), ammunition_cont, ammunition1_cont, score_cont, health_cont, enemy_track_cont, player_x_cont, player_y_cont, ammo_track_cont, health_kit_track_cont, player_bullet_click_track_cont, player_bullet_track_cont, music_playing_cont, autoAiming, high_score_cont, mute, score_to_add_cont)
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
                     pygame.quit()
@@ -1669,11 +1711,21 @@ class MainMenu:
                                     file.write(str(1))
                                 else:
                                     file.write(str(0))
+                                file.write('\n0')
+                                if(auto_aiming_init == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
                         if (onSound == True) and (soundClicked == True) and (mute == True):
                             mute = False
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score))
                                 file.write('\n0')
+                                file.write('\n1')
+                                if (auto_aiming_init == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
                             music_playing = True
                             mixer.music.load('Menu.wav')
                             pygame.mixer.music.play(-1)
@@ -1682,6 +1734,11 @@ class MainMenu:
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score))
                                 file.write('\n1')
+                                file.write('\n1')
+                                if (auto_aiming_init == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
                             music_playing = False
                             mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -2519,14 +2576,35 @@ class Controls:
                             if(autoAiming == True):
                                 autoAiming = False
                                 player.auto = False
+                                with open('BulletBashSaveFile.txt', 'w') as file:
+                                    file.write(str(high_score_init))
+                                    if(mute == True):
+                                        file.write('\n1')
+                                    else:
+                                        file.write('\n0')
+                                    file.write('\n1')
+                                    file.write('\n0')
                             else:
                                 autoAiming = True
                                 player.auto = True
+                                with open('BulletBashSaveFile.txt', 'w') as file:
+                                    file.write(str(high_score_init))
+                                    if(mute == True):
+                                        file.write('\n1')
+                                    else:
+                                        file.write('\n0')
+                                    file.write('\n1')
+                                    file.write('\n1')
                         if(soundClicked == True) and (onSound == True) and (mute == False):
                             mute = True
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score_init))
+                                file.write('\n' + str(1))
                                 file.write('\n1')
+                                if(autoAiming == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
                             mixer.music.stop()
                             lowVolume, highVolume = 0, 0
                             red_bullet_sound.set_volume(lowVolume)
@@ -2541,6 +2619,11 @@ class Controls:
                             with open('BulletBashSaveFile.txt', 'w') as file:
                                 file.write(str(high_score_init))
                                 file.write('\n0')
+                                file.write('\n1')
+                                if (autoAiming == True):
+                                    file.write('\n1')
+                                else:
+                                    file.write('\n0')
                             mixer.music.load('Gameplay.wav')
                             pygame.mixer.music.play(-1)
                             lowVolume, highvolume = 0.2, 0.3
@@ -3150,4 +3233,12 @@ class Tutorial:
                     pygame.quit()
                     sys.exit()
 
-Tutorial.main(Tutorial(), high_score_save, mute_save, False)
+if(tutorial_happen_save == 0):
+    with open('BulletBashSaveFile.txt', 'w') as file:
+        file.write(str(high_score_save))
+        file.write('\n' + str(mute_save))
+        file.write('\n1')
+        file.write('\n' + str(auto_aim_save))
+    Tutorial.main(Tutorial(), high_score_save, mute_save, False)
+else:
+    MainMenu.main(MainMenu(), False, auto_aim_bool, high_score_save, False, mute_save)
