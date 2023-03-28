@@ -2624,7 +2624,7 @@ class Controls:
                                     file.write('\n1')
                                 else:
                                     file.write('\n0')
-                            mixer.music.load('resources/Gameplay.wav')
+                            mixer.music.load('resources/Menu.wav')
                             pygame.mixer.music.play(-1)
                             lowVolume, highvolume = 0.2, 0.3
                             red_bullet_sound.set_volume(lowVolume)
