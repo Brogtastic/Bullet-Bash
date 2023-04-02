@@ -112,6 +112,8 @@ class Game:
         healthBarBGColor = (50, 138, 178, 70)
         highScoreColor = (255, 255, 255)
 
+        red_yellow_num = [0, 0]
+
         class Player:
             def __init__(self, x, y, width, height, full_health, player_color, auto, clicking):
                 self.x = x
@@ -506,6 +508,12 @@ class Game:
                 self.health = health
                 self.speed = speed
                 self.color = color
+                if(self.color == "red"):
+                    red_yellow_num[0] += 1
+                    print("Reds: " + str(red_yellow_num[0]))
+                else:
+                    red_yellow_num[1] += 1
+                    print("Yellows: " + str(red_yellow_num[1]))
                 self.drop_chance = random.randint(0, 100)
                 self.placement = track
                 self.isAlive = True
@@ -548,8 +556,12 @@ class Game:
                     if(self.health <= 0):
                         if(self.color == "red"):
                             red_die_sound.play()
+                            red_yellow_num[0] -= 1
+                            print("Reds: " + str(red_yellow_num[0]))
                         else:
                             yellow_die_sound.play()
+                            red_yellow_num[1] -= 1
+                            print("Yellows: " + str(red_yellow_num[1]))
 
                         for i in range(15):
                             death_particles.append(deathParticles(self.x + random.randint(0, 100), self.y + random.randint(0, 100), 10, 10, self.color, self.x, self.y))
@@ -1372,14 +1384,19 @@ class Game:
                         closest_red_enemy_x = enemy.x # +25
                         closest_red_enemy_y = enemy.y # +30
                         closest_distance = distance
-
-                if (enemy.health > 0):
-                    distance = get_distance((enemy.x, enemy.y), (player.x, player.y))
-                    if (distance < closest_distance) and (enemy.color == "yellow"):
+                    elif (distance < closest_distance) and (enemy.color == "yellow"):
                         closest_yellow_enemy = enemy
                         closest_yellow_enemy_x = enemy.x
                         closest_yellow_enemy_y = enemy.y
                         closest_distance = distance
+            if (red_yellow_num[1] == 0) and (red_yellow_num[0] > 0):
+                closest_yellow_enemy = closest_red_enemy
+                closest_yellow_enemy_x = closest_red_enemy_x
+                closest_yellow_enemy_y = closest_red_enemy_y
+            if (red_yellow_num[0] == 0) and (red_yellow_num[1] > 0):
+                closest_red_enemy = closest_yellow_enemy
+                closest_red_enemy_x = closest_yellow_enemy_x
+                closest_red_enemy_y = closest_yellow_enemy_y
 
             ammo_count_display.main()
             ammo_count_display1.main()
@@ -1616,8 +1633,6 @@ class MainMenu:
             Game.main(Game(), 45, 45, 0, 100, enemy_track, 400, 300, ammo_track, health_kit_track, player_bullet_click_track, player_bullet_track, False, auto_aiming_init, high_score, mute, 0)
 
         while True:
-            pygame.mouse.set_visible(True)
-
             display.fill(backgroundColor)
 
             titleText = titlefont.render("BULLET BASH", 1, (255, 255, 255))
@@ -1658,6 +1673,8 @@ class MainMenu:
             display.blit(highSCORE, (50, 550))
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
+
+            pygame.mouse.set_visible(True)
 
             if play_rect.collidepoint(mouse_x, mouse_y):
                 playcolor = highlightcolor
@@ -2426,16 +2443,16 @@ class Controls:
         buttonPressColorRight = backgroundColor
         buttonPressColorUp = backgroundColor
         buttonPressColorDown = backgroundColor
-        buttonPressColorZ = lightred
-        buttonPressColorX = lightyellow
+        buttonPressColorZ = backgroundColor
+        buttonPressColorX = backgroundColor
 
         buttonPressColorA = backgroundColor
         buttonPressColorD = backgroundColor
         buttonPressColorW = backgroundColor
         buttonPressColorS = backgroundColor
         checkboxhighlightcolor = backgroundColor
-        rightClickPress = lightyellow
-        leftClickPress = lightred
+        rightClickPress = backgroundColor
+        leftClickPress = backgroundColor
 
         backArrowColor = backgroundColor
         soundcolor = backgroundColor
@@ -2938,14 +2955,12 @@ class Controls:
                         closest_red_enemy_x = enemy.x # +25
                         closest_red_enemy_y = enemy.y # +30
                         closest_distance = distance
-
-                if (enemy.health > 0):
-                    distance = get_distance((enemy.x, enemy.y), (player.x, player.y))
-                    if (distance < closest_distance) and (enemy.color == "yellow"):
+                    elif (distance < closest_distance) and (enemy.color == "yellow"):
                         closest_yellow_enemy = enemy
                         closest_yellow_enemy_x = enemy.x
                         closest_yellow_enemy_y = enemy.y
                         closest_distance = distance
+
 
                 if(enemy.health <= 0) and (enemy.side == "right"):
                     enemyOnRight -= 1
@@ -3242,4 +3257,3 @@ if(tutorial_happen_save == 0):
     Tutorial.main(Tutorial(), high_score_save, mute_save, False, auto_aim_bool)
 else:
     MainMenu.main(MainMenu(), False, auto_aim_bool, high_score_save, False, mute_save)
-
