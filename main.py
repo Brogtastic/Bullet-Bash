@@ -510,10 +510,8 @@ class Game:
                 self.color = color
                 if(self.color == "red"):
                     red_yellow_num[0] += 1
-                    print("Reds: " + str(red_yellow_num[0]))
                 else:
                     red_yellow_num[1] += 1
-                    print("Yellows: " + str(red_yellow_num[1]))
                 self.drop_chance = random.randint(0, 100)
                 self.placement = track
                 self.isAlive = True
@@ -1826,6 +1824,7 @@ class Controls:
         closest_yellow_enemy_x = 670
         closest_yellow_enemy_y = 165
         autoAiming = aiming_init
+        red_yellow_num = [0, 0]
 
         class Player:
             def __init__(self, x, y, width, height, full_health, player_color, auto, clicking):
@@ -1965,6 +1964,10 @@ class Controls:
                 self.health = health
                 self.speed = speed
                 self.color = color
+                if (self.color == "red"):
+                    red_yellow_num[0] += 1
+                else:
+                    red_yellow_num[1] += 1
                 self.drop_chance = random.randint(0, 100)
                 self.placement = track
                 self.isAlive = True
@@ -2007,8 +2010,10 @@ class Controls:
                     if(self.health <= 0):
                         if(self.color == "red"):
                             red_die_sound.play()
+                            red_yellow_num[0] -= 1
                         else:
                             yellow_die_sound.play()
+                            red_yellow_num[1] -= 1
 
                         for i in range(15):
                             death_particles.append(deathParticles(self.x + random.randint(0, 100), self.y + random.randint(0, 100), 10, 10, self.color, self.x, self.y))
@@ -2960,6 +2965,15 @@ class Controls:
                         closest_yellow_enemy_x = enemy.x
                         closest_yellow_enemy_y = enemy.y
                         closest_distance = distance
+
+                if (red_yellow_num[1] == 0) and (red_yellow_num[0] > 0):
+                    closest_yellow_enemy = closest_red_enemy
+                    closest_yellow_enemy_x = closest_red_enemy_x
+                    closest_yellow_enemy_y = closest_red_enemy_y
+                if (red_yellow_num[0] == 0) and (red_yellow_num[1] > 0):
+                    closest_red_enemy = closest_yellow_enemy
+                    closest_red_enemy_x = closest_yellow_enemy_x
+                    closest_red_enemy_y = closest_yellow_enemy_y
 
 
                 if(enemy.health <= 0) and (enemy.side == "right"):
