@@ -9,6 +9,7 @@ import sys
 import math
 import random
 import asyncio
+import os
 from pygame import mixer
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
@@ -45,8 +46,11 @@ class Game:
         mute = mute_init
         music_playing = music_playing_init
         if(mute == False) and (music_playing == False):
-            mixer.music.load('resources/Gameplay.wav')
-            pygame.mixer.music.play(-1)
+            try:
+                mixer.music.load('resources/Gameplay.wav')
+                pygame.mixer.music.play(-1)
+            except Exception:
+                pass
             music_playing = True
 
         if(mute == False):
@@ -56,20 +60,23 @@ class Game:
             lowVolume = 0
             highVolume = 0
 
-        red_bullet_sound = mixer.Sound('resources/red bullet.wav')
-        red_bullet_sound.set_volume(lowVolume)
-        yellow_bullet_sound = mixer.Sound('resources/yellow bullet.wav')
-        yellow_bullet_sound.set_volume(lowVolume)
-        red_die_sound = mixer.Sound('resources/red enemy die.wav')
-        red_die_sound.set_volume(highVolume)
-        yellow_die_sound = mixer.Sound('resources/yellow enemy die.wav')
-        yellow_die_sound.set_volume(highVolume)
-        red_ammo_sound = mixer.Sound('resources/red ammo pickup.wav')
-        red_ammo_sound.set_volume(lowVolume)
-        yellow_ammo_sound = mixer.Sound('resources/yellow ammo pickup.wav')
-        yellow_ammo_sound.set_volume(lowVolume)
-        health_kit_sound = mixer.Sound('resources/health kit pickup.wav')
-        health_kit_sound.set_volume(highVolume)
+        try:
+            red_bullet_sound = mixer.Sound('resources/red bullet.wav')
+            red_bullet_sound.set_volume(lowVolume)
+            yellow_bullet_sound = mixer.Sound('resources/yellow bullet.wav')
+            yellow_bullet_sound.set_volume(lowVolume)
+            red_die_sound = mixer.Sound('resources/red enemy die.wav')
+            red_die_sound.set_volume(highVolume)
+            yellow_die_sound = mixer.Sound('resources/yellow enemy die.wav')
+            yellow_die_sound.set_volume(highVolume)
+            red_ammo_sound = mixer.Sound('resources/red ammo pickup.wav')
+            red_ammo_sound.set_volume(lowVolume)
+            yellow_ammo_sound = mixer.Sound('resources/yellow ammo pickup.wav')
+            yellow_ammo_sound.set_volume(lowVolume)
+            health_kit_sound = mixer.Sound('resources/health kit pickup.wav')
+            health_kit_sound.set_volume(highVolume)
+        except Exception:
+            pass
 
         size = width, height = 800, 600
         display = pygame.display.set_mode((size))
@@ -204,7 +211,10 @@ class Game:
 
             def damageKB(self, enemyx, enemyy):
                 if(self.health > 0):
-                    red_die_sound.play()
+                    try:
+                        red_die_sound.play()
+                    except Exception:
+                        pass
                     pygame.draw.rect(display, (255, 255, 255), (self.x, self.y, self.width, self.height))
                     if (enemyx > self.x):
                         self.target_x -= self.speed * 20
@@ -218,8 +228,11 @@ class Game:
 
             def terminate(self, enemyx, enemyy):
                 if(self.dead == False):
-                    red_die_sound.play()
-                    yellow_die_sound.play()
+                    try:
+                        red_die_sound.play()
+                        yellow_die_sound.play()
+                    except Exception:
+                        pass
                     self.dead = True
                     for i in range(15):
                         death_particles.append(deathParticles(self.x + random.randint(0, 100), self.y + random.randint(0, 100), 7, 7, self.color, enemyx, enemyy))
@@ -279,9 +292,15 @@ class Game:
         class PlayerBullet:
             def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel, auto, playerdirection):
                 if (color == bulletColor):
-                    red_bullet_sound.play()
+                    try:
+                        red_bullet_sound.play()
+                    except Exception:
+                        pass
                 else:
-                    yellow_bullet_sound.play()
+                    try:
+                        yellow_bullet_sound.play()
+                    except Exception:
+                        pass
                 self.x = x
                 self.y = y
                 self.enemy_x = closest_enemy_x + 20
@@ -424,9 +443,15 @@ class Game:
         class PlayerBulletClick:
             def __init__(self, x, y, mouse_x, mouse_y, direction, color, track, alive, exploded, angle, x_vel, y_vel):
                 if(color == bulletColor):
-                    red_bullet_sound.play()
+                    try:
+                        red_bullet_sound.play()
+                    except Exception:
+                        pass
                 else:
-                    yellow_bullet_sound.play()
+                    try:
+                        yellow_bullet_sound.play()
+                    except Exception:
+                        pass
                 self.x = x
                 self.y = y
                 if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
@@ -553,11 +578,17 @@ class Game:
                     self.health -= damage
                     if(self.health <= 0):
                         if(self.color == "red"):
-                            red_die_sound.play()
+                            try:
+                                red_die_sound.play()
+                            except Exception:
+                                pass
                             red_yellow_num[0] -= 1
                             print("Reds: " + str(red_yellow_num[0]))
                         else:
-                            yellow_die_sound.play()
+                            try:
+                                yellow_die_sound.play()
+                            except Exception:
+                                pass
                             red_yellow_num[1] -= 1
                             print("Yellows: " + str(red_yellow_num[1]))
 
@@ -998,7 +1029,10 @@ class Game:
             display.blit(highSCORE, (635, 35))
             display.blit(hi_score, (630, 15))
             if(player.health <= 0):
-                mixer.music.stop()
+                try:
+                    mixer.music.stop()
+                except Exception:
+                    pass
             if(gameover == True):
                 pygame.draw.rect(display, backgroundColor, (game_over_screen_rect), 700, 10)
                 pygame.draw.rect(display, (255, 255, 255), (game_over_screen_outline), 10, 10)
@@ -1291,7 +1325,10 @@ class Game:
                 kit_rect = kit.main(display)
                 if kit_rect.colliderect(player.get_rect()):
                     if kit.pickedup == False:
-                        health_kit_sound.play()
+                        try:
+                            health_kit_sound.play()
+                        except Exception:
+                            pass
                         kit.pickedup = True
                         if(player.health >= 90):
                             for i in range(full_health - player.health):
@@ -1310,9 +1347,15 @@ class Game:
                     if (ammo.pickedup == False) and (ammo.dead == False):
                         ammo.pickedup = True
                         if(ammo.color == bulletColor):
-                            red_ammo_sound.play()
+                            try:
+                                red_ammo_sound.play()
+                            except Exception:
+                                pass
                         else:
-                            yellow_ammo_sound.play()
+                            try:
+                                yellow_ammo_sound.play()
+                            except Exception:
+                                pass
                         if(ammo.color == "red"):
                             for i in range(ammo_plus):
                                 if(full_ammunition - ammunition) > 0:
@@ -1526,8 +1569,11 @@ class PauseGame:
                                 else:
                                     file.write('\n1')
                             music_playing_cont = True
-                            mixer.music.load('resources/Gameplay.wav')
-                            pygame.mixer.music.play(-1)
+                            try:
+                                mixer.music.load('resources/Gameplay.wav')
+                                pygame.mixer.music.play(-1)
+                            except Exception:
+                                pass
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
                             with open('resources/BulletBashSaveFile.txt', 'w') as file:
@@ -1539,7 +1585,10 @@ class PauseGame:
                                 else:
                                     file.write('\n1')
                             music_playing_cont = False
-                            mixer.music.stop()
+                            try:
+                                mixer.music.stop()
+                            except Exception:
+                                pass
                         if(checkboxClicked == True) and (onCheckbox == True) and (autoAiming == True):
                             autoAiming = False
                             with open('resources/BulletBashSaveFile.txt', 'w') as file:
@@ -1588,10 +1637,14 @@ class MainMenu:
     def main(self, myreplay, aiming_init, high_score_init, music_playing_init, mute_init):
         mute = mute_init
         music_playing = music_playing_init
+        file_path = os.path.join(os.path.dirname(__file__), 'resources/Menu.wav')
         if(mute == False) and (music_playing == False):
-            mixer.music.load('resources/Menu.wav')
-            pygame.mixer.music.play(-1)
-            music_playing = True
+            try:
+                mixer.music.load('resources/Menu.wav')
+                pygame.mixer.music.play(-1)
+                music_playing = True
+            except Exception:
+                pass
 
         textfont = pygame.font.SysFont("Verdana", 50)
         titlefont = pygame.font.SysFont("Verdana", 80)
@@ -1742,8 +1795,11 @@ class MainMenu:
                                 else:
                                     file.write('\n0')
                             music_playing = True
-                            mixer.music.load('resources/Menu.wav')
-                            pygame.mixer.music.play(-1)
+                            try:
+                                mixer.music.load('resources/Menu.wav')
+                                pygame.mixer.music.play(-1)
+                            except Exception:
+                                pass
                         elif (onSound == True) and (soundClicked == True) and (mute == False):
                             mute = True
                             with open('resources/BulletBashSaveFile.txt', 'w') as file:
@@ -1755,7 +1811,10 @@ class MainMenu:
                                 else:
                                     file.write('\n0')
                             music_playing = False
-                            mixer.music.stop()
+                            try:
+                                mixer.music.stop()
+                            except Exception:
+                                pass
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         print("x: " + str(mouse_x) + " y: " + str(mouse_y))
@@ -1792,20 +1851,23 @@ class Controls:
             lowVolume = 0
             highVolume = 0
 
-        red_bullet_sound = mixer.Sound('resources/red bullet.wav')
-        red_bullet_sound.set_volume(lowVolume)
-        yellow_bullet_sound = mixer.Sound('resources/yellow bullet.wav')
-        yellow_bullet_sound.set_volume(lowVolume)
-        red_die_sound = mixer.Sound('resources/red enemy die.wav')
-        red_die_sound.set_volume(highVolume)
-        yellow_die_sound = mixer.Sound('resources/yellow enemy die.wav')
-        yellow_die_sound.set_volume(highVolume)
-        red_ammo_sound = mixer.Sound('resources/red ammo pickup.wav')
-        red_ammo_sound.set_volume(lowVolume)
-        yellow_ammo_sound = mixer.Sound('resources/yellow ammo pickup.wav')
-        yellow_ammo_sound.set_volume(lowVolume)
-        health_kit_sound = mixer.Sound('resources/health kit pickup.wav')
-        health_kit_sound.set_volume(highVolume)
+        try:
+            red_bullet_sound = mixer.Sound('resources/red bullet.wav')
+            red_bullet_sound.set_volume(lowVolume)
+            yellow_bullet_sound = mixer.Sound('resources/yellow bullet.wav')
+            yellow_bullet_sound.set_volume(lowVolume)
+            red_die_sound = mixer.Sound('resources/red enemy die.wav')
+            red_die_sound.set_volume(highVolume)
+            yellow_die_sound = mixer.Sound('resources/yellow enemy die.wav')
+            yellow_die_sound.set_volume(highVolume)
+            red_ammo_sound = mixer.Sound('resources/red ammo pickup.wav')
+            red_ammo_sound.set_volume(lowVolume)
+            yellow_ammo_sound = mixer.Sound('resources/yellow ammo pickup.wav')
+            yellow_ammo_sound.set_volume(lowVolume)
+            health_kit_sound = mixer.Sound('resources/health kit pickup.wav')
+            health_kit_sound.set_volume(highVolume)
+        except Exception:
+            pass
 
         #playerColor = (119, 131, 225, 65)
         playerColor = (60, 168, 166, 66)
@@ -1916,7 +1978,10 @@ class Controls:
 
             def damageKB(self, enemyx, enemyy):
                 if(self.health > 0):
-                    red_die_sound.play()
+                    try:
+                        red_die_sound.play()
+                    except Exception:
+                        pass
                     pygame.draw.rect(display, (255, 255, 255), (self.x, self.y, self.width, self.height))
                     if (enemyx > self.x):
                         self.target_x -= self.speed * 20
@@ -2009,10 +2074,16 @@ class Controls:
                     self.health -= damage
                     if(self.health <= 0):
                         if(self.color == "red"):
-                            red_die_sound.play()
+                            try:
+                                red_die_sound.play()
+                            except Exception:
+                                pass
                             red_yellow_num[0] -= 1
                         else:
-                            yellow_die_sound.play()
+                            try:
+                                yellow_die_sound.play()
+                            except Exception:
+                                pass
                             red_yellow_num[1] -= 1
 
                         for i in range(15):
@@ -2106,9 +2177,15 @@ class Controls:
         class PlayerBullet:
             def __init__(self, x, y, closest_enemy_x, closest_enemy_y, direction, color, track, alive, exploded, angle, x_vel, y_vel, auto, playerdirection):
                 if (color == bulletColor):
-                    red_bullet_sound.play()
+                    try:
+                        red_bullet_sound.play()
+                    except Exception:
+                        pass
                 else:
-                    yellow_bullet_sound.play()
+                    try:
+                        yellow_bullet_sound.play()
+                    except Exception:
+                        pass
                 self.x = x
                 self.y = y
                 self.enemy_x = closest_enemy_x + 20
@@ -2246,9 +2323,15 @@ class Controls:
         class PlayerBulletClick:
             def __init__(self, x, y, mouse_x, mouse_y, direction, color, track, alive, exploded, angle, x_vel, y_vel):
                 if(color == bulletColor):
-                    red_bullet_sound.play()
+                    try:
+                        red_bullet_sound.play()
+                    except Exception:
+                        pass
                 else:
-                    yellow_bullet_sound.play()
+                    try:
+                        yellow_bullet_sound.play()
+                    except Exception:
+                        pass
                 self.x = x
                 self.y = y
                 if ((mouse_x > self.x) and (((mouse_y - self.y) >= 0) and (mouse_y - self.y) <= 50)):
@@ -2627,15 +2710,18 @@ class Controls:
                                     file.write('\n1')
                                 else:
                                     file.write('\n0')
-                            mixer.music.stop()
-                            lowVolume, highVolume = 0, 0
-                            red_bullet_sound.set_volume(lowVolume)
-                            yellow_bullet_sound.set_volume(lowVolume)
-                            red_die_sound.set_volume(highVolume)
-                            yellow_die_sound.set_volume(highVolume)
-                            red_ammo_sound.set_volume(lowVolume)
-                            yellow_ammo_sound.set_volume(lowVolume)
-                            health_kit_sound.set_volume(highVolume)
+                            try:
+                                mixer.music.stop()
+                                lowVolume, highVolume = 0, 0
+                                red_bullet_sound.set_volume(lowVolume)
+                                yellow_bullet_sound.set_volume(lowVolume)
+                                red_die_sound.set_volume(highVolume)
+                                yellow_die_sound.set_volume(highVolume)
+                                red_ammo_sound.set_volume(lowVolume)
+                                yellow_ammo_sound.set_volume(lowVolume)
+                                health_kit_sound.set_volume(highVolume)
+                            except Exception:
+                                pass
                         elif (soundClicked == True) and (onSound == True) and (mute == True):
                             mute = False
                             with open('resources/BulletBashSaveFile.txt', 'w') as file:
@@ -2646,16 +2732,19 @@ class Controls:
                                     file.write('\n1')
                                 else:
                                     file.write('\n0')
-                            mixer.music.load('resources/Menu.wav')
-                            pygame.mixer.music.play(-1)
-                            lowVolume, highvolume = 0.2, 0.3
-                            red_bullet_sound.set_volume(lowVolume)
-                            yellow_bullet_sound.set_volume(lowVolume)
-                            red_die_sound.set_volume(highVolume)
-                            yellow_die_sound.set_volume(highVolume)
-                            red_ammo_sound.set_volume(lowVolume)
-                            yellow_ammo_sound.set_volume(lowVolume)
-                            health_kit_sound.set_volume(highVolume)
+                            try:
+                                mixer.music.load('resources/Menu.wav')
+                                pygame.mixer.music.play(-1)
+                                lowVolume, highvolume = 0.2, 0.3
+                                red_bullet_sound.set_volume(lowVolume)
+                                yellow_bullet_sound.set_volume(lowVolume)
+                                red_die_sound.set_volume(highVolume)
+                                yellow_die_sound.set_volume(highVolume)
+                                red_ammo_sound.set_volume(lowVolume)
+                                yellow_ammo_sound.set_volume(lowVolume)
+                                health_kit_sound.set_volume(highVolume)
+                            except Exception:
+                                pass
                 if event.type == BULLET_SPRAY_DELAY:
                     shootAgain = True
                 if event.type == INVINCIBILITY:
