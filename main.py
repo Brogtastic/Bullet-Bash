@@ -25,21 +25,45 @@ pygame.display.set_caption('Bullet Bash')
 backgroundColor = (26, 32, 64, 25)
 backgroundColor1 = (0, 0, 0)
 
-with open('resources/BulletBashSaveFile.txt', 'r') as file:
-    high_score_save = int(file.readline())
-    mute_save = int(file.readline())
-    tutorial_happen_save = int(file.readline())
-    auto_aim_save = int(file.readline())
+tutorial_happen_save = 0
+high_score_save = 0
+mute_save_bool = False
+auto_aim_bool = True
 
-if(mute_save == 1):
-    mute_save_bool = True
-else:
+if not os.path.exists('resources'):
+    os.makedirs('resources')
+
+try:
+    with open('resources/BulletBashSaveFile.txt', 'r') as file:
+        high_score_save = int(file.readline())
+        mute_save_bool = bool(int(file.readline()))
+        tutorial_happen_save = int(file.readline())
+        auto_aim_bool = bool(int(file.readline()))
+    if(mute_save_bool == True):
+        mute_save = 1
+    else:
+        mute_save = 0
+    if(auto_aim_bool == True):
+        auto_aim_save = 1
+    else:
+        auto_aim_save = 0
+
+except Exception:
+    with open('resources/BulletBashSaveFile.txt', 'w') as file:
+        file.write('0')
+        file.write('0')
+        file.write('0')
+        file.write('1')
+    high_score_save, mute_save, tutorial_happen_save = 0, 0, 0
+    auto_aim_save = 1
     mute_save_bool = False
-
-if(auto_aim_save == 1):
     auto_aim_bool = True
-else:
-    auto_aim_bool = False
+    print("BluesBashSaveFile.txt has just been created.")
+
+try:
+    mixer.music.load('resources/Menu.wav')
+except Exception:
+    print("Music file not found. Music and sound effects may not play.")
 
 class Game:
     def main(self, ammunition_init, ammunition1_init, score_init, health_init, enemy_track_init, player_x_init, player_y_init, ammo_track_init, health_kit_track_init, player_bullets_click_track_init, player_bullets_track_init, music_playing_init, auto_aiming_init, high_score_init, mute_init, score_to_add_init):
@@ -3357,6 +3381,6 @@ if(tutorial_happen_save == 0):
         file.write('\n' + str(mute_save))
         file.write('\n1')
         file.write('\n' + str(auto_aim_save))
-    Tutorial.main(Tutorial(), high_score_save, mute_save, False, auto_aim_bool)
+    Tutorial.main(Tutorial(), high_score_save, mute_save_bool, False, auto_aim_bool)
 else:
-    MainMenu.main(MainMenu(), False, auto_aim_bool, high_score_save, False, mute_save)
+    MainMenu.main(MainMenu(), False, auto_aim_bool, high_score_save, False, mute_save_bool)
